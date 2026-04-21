@@ -1,7 +1,7 @@
 ﻿using EcoLilly.Models;
-using System; // Added System
+using System;
 
-namespace EcoLilly.Models // Added namespace
+namespace EcoLilly.Models
 {
     public class Review
     {
@@ -18,12 +18,5 @@ namespace EcoLilly.Models // Added namespace
         public int ProductId { get; set; }
 
         public Product? Product { get; set; }
-    }
-
-    public class ApplicationDbContext : DbContext
-    {
-        public DbSet<Review> Reviews { get; set; }
-
-        // ... existing code ...
     }
 }
