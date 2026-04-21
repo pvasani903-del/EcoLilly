@@ -1,4 +1,4 @@
-﻿@model List<EcoLilly.Models.Order>
+﻿@model IEnumerable<EcoLilly.Models.Order>
 
 @{
     ViewData["Title"] = "My Orders";
@@ -11,7 +11,7 @@
         My Orders
     </h2>
 
-    @if (Model == null || !Model.Any())
+    @if (!Model.Any())
     {
         <div class="bg-white p-6 rounded shadow text-center">
 
@@ -33,37 +33,43 @@
     }
     else
     {
-        @foreach (var order in Model)
+        foreach (var order in Model)
         {
-
-            <div class="bg-white shadow rounded-xl p-6 mb-4 flex justify-between items-center">
-
-                <div>
-
-                    <h3 class="font-semibold">
-                        Order #@order.Id
-                    </h3>
-
-                    <p class="text-gray-500">
-                        Date: @order.OrderDate.ToString("dd MMM yyyy")
-                    </p>
-
+            <div class="card mb-3">
+                <div class="card-header">
+                    <strong>Order #@order.Id</strong> - @order.OrderDate.ToString("MMM dd, yyyy") | Total: $@order.TotalAmount
                 </div>
+                <div class="card-body">
+                    <ul>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <li>
+                                @item.Product.Name - Quantity: @item.Quantity
 
-                <div class="text-right">
+                                @{
+                                    // Check if this specific user has reviewed this product
+                                    var userReview = item.Product.Reviews?.FirstOrDefault(r => r.User == order.UserEmail);
+                                }
 
-                    <p class="font-bold text-lg text-green-600">
-                        ₹@order.TotalAmount
-                    </p>
-
-                    <span class="px-3 py-1 rounded bg-gray-200 text-sm">
-                        @order.PaymentStatus
-                    </span>
-
+                                @if (userReview != null)
+                                {
+                                    <div class="alert alert-info mt-2 p-2">
+                                        <strong>Your Review (@userReview.Rating/5):</strong> @userReview.Comment
+                                        <br /><small class="text-muted">Reviewed on: @userReview.Date.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    // Show a button linking to a page where they can create the review
+                                    <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })" class="btn btn-sm btn-outline-primary mt-2">
+                                        Write a Review
+                                    </a>
+                                }
+                            </li>
+                        }
+                    </ul>
                 </div>
-
             </div>
-
         }
     }
 

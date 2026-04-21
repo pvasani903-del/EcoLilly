@@ -21,15 +21,31 @@ namespace EcoLilly.Controllers
             _env = env;
         }
 
-        // Index with search
+        // ✅ INDEX (Search)
         public async Task<IActionResult> Index(string q)
         {
             var products = _db.Products.AsQueryable();
+
             if (!string.IsNullOrEmpty(q))
                 products = products.Where(p => p.Name != null && p.Name.Contains(q));
+
             return View(await products.OrderByDescending(p => p.Id).ToListAsync());
         }
 
+        // ✅ DETAILS (WITH REVIEWS) ⭐ IMPORTANT
+        public IActionResult Details(int id)
+        {
+            var product = _db.Products
+                .Include(p => p.Reviews)   // 👈 THIS LOADS REVIEWS
+                .FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+                return NotFound();
+
+            return View(product);
+        }
+
+        // ✅ CREATE
         public IActionResult Create()
         {
             return View(new Product());
@@ -41,33 +57,39 @@ namespace EcoLilly.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // Ensure EcoFeatures is not null (DB column is non-nullable)
             model.EcoFeatures = model.EcoFeatures ?? string.Empty;
 
             if (image != null && image.Length > 0)
             {
                 var uploads = Path.Combine(_env.WebRootPath, "uploads");
                 if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+
                 var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
                 var filePath = Path.Combine(uploads, fileName);
+
                 using var fs = new FileStream(filePath, FileMode.Create);
                 await image.CopyToAsync(fs);
+
                 model.Image = "/uploads/" + fileName;
             }
 
             _db.Products.Add(model);
             await _db.SaveChangesAsync();
+
             TempData["success"] = "Product added";
             return RedirectToAction(nameof(Index));
         }
 
+        // ✅ EDIT (GET)
         public async Task<IActionResult> Edit(int id)
         {
             var p = await _db.Products.FindAsync(id);
             if (p == null) return NotFound();
+
             return View(p);
         }
 
+        // ✅ EDIT (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Product model, IFormFile? image)
@@ -83,35 +105,41 @@ namespace EcoLilly.Controllers
             existing.Description = model.Description;
             existing.Category = model.Category;
             existing.InStock = model.InStock;
-            // Keep existing value if model.EcoFeatures is null; otherwise update (and guard against null)
             existing.EcoFeatures = model.EcoFeatures ?? existing.EcoFeatures ?? string.Empty;
 
             if (image != null && image.Length > 0)
             {
                 var uploads = Path.Combine(_env.WebRootPath, "uploads");
                 if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+
                 var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
                 var filePath = Path.Combine(uploads, fileName);
+
                 using var fs = new FileStream(filePath, FileMode.Create);
                 await image.CopyToAsync(fs);
+
                 existing.Image = "/uploads/" + fileName;
             }
 
             _db.Products.Update(existing);
             await _db.SaveChangesAsync();
+
             TempData["success"] = "Product updated";
             return RedirectToAction(nameof(Index));
         }
 
+        // ✅ DELETE
         public async Task<IActionResult> Delete(int id)
         {
             var p = await _db.Products.FindAsync(id);
+
             if (p != null)
             {
                 _db.Products.Remove(p);
                 await _db.SaveChangesAsync();
                 TempData["success"] = "Product deleted";
             }
+
             return RedirectToAction(nameof(Index));
         }
     }

@@ -11,6 +11,7 @@ namespace EcoLilly.Data
         }
 
         public DbSet<Product> Products { get; set; }
+
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Contact> Contacts { get; set; }
@@ -23,6 +24,7 @@ namespace EcoLilly.Data
 
         // Discount / Coupon Table
         public DbSet<Discount> Discounts { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

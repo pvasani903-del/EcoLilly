@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore; // Added for .Include()
 
 namespace EcoLilly.Controllers
 {
@@ -19,7 +20,11 @@ namespace EcoLilly.Controllers
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
 
+            // Include OrderItems, Product, and Reviews to display them in the view
             var orders = _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p.Reviews)
                 .Where(o => o.UserEmail == userEmail)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();

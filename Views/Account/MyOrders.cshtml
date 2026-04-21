@@ -5,7 +5,6 @@
 }
 
 <section class="max-w-6xl mx-auto px-4 py-10">
-
     <h2 class="text-3xl font-bold mb-8 text-gray-800">
         My Orders
     </h2>
@@ -21,7 +20,6 @@
         foreach (var order in Model)
         {
             <div class="bg-white shadow-lg rounded-xl mb-6 p-6">
-
                 <div class="flex justify-between mb-4">
                     <div>
                         <p class="font-semibold">Order ID: #@order.Id</p>
@@ -37,22 +35,26 @@
                 <div class="border-t pt-4">
                     @foreach (var item in order.OrderItems)
                     {
-                        <div class="flex justify-between py-2">
+                        <div class="flex justify-between py-2 items-center border-b pb-2">
                             <div>
-                                <p>@item.Product.Name</p>
+                                <p class="font-semibold">@item.Product.Name</p>
                                 <p class="text-sm text-gray-500">
                                     Qty: @item.Quantity
                                 </p>
                             </div>
-                            <div>
-                                ₹@(item.Price* item.Quantity)
+                            <div class="flex items-center gap-4">
+                                <span class="font-bold">₹@(item.Price * item.Quantity)</span>
+                                
+                                <!-- Add Review Button -->
+                                <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })" 
+                                   class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition">
+                                    Write a Review
+                                </a>
                             </div>
                         </div>
                     }
                 </div>
-
             </div>
         }
     }
-
 </section>
