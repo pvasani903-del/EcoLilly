@@ -1,0 +1,96 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var adminName = Context.Session.GetString("AdminName") ?? "Admin";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string Active(string ctrl) => string.Equals(ctrl, currentController, System.StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Admin • EcoLilly</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/admin.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="d-flex admin-root">
+        <nav id="sidebar" class="bg-dark text-white">
+            <div class="sidebar-inner p-3 d-flex flex-column h-100">
+                <a class="navbar-brand text-white mb-3 fs-5 fw-bold" asp-controller="Admin" asp-action="Index">🌿 EcoLilly Admin</a>
+
+                <ul class="nav flex-column mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("Admin")" asp-controller="Admin" asp-action="Index">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("AdminProduct")" asp-controller="AdminProduct" asp-action="Index">Product</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("AdminCart")" asp-controller="AdminCart" asp-action="Index">Cart</a>
+                    </li>
+                    @* <li class="nav-item">
+                        <a class="nav-link text-white @Active("Wishlist")" asp-controller="Wishlist" asp-action="Index">Wishlist</a>
+                    </li> *@
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("AdminUser")" asp-controller="AdminUser" asp-action="Index">User</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("AdminDiscount")" asp-controller="AdminDiscount" asp-action="Index">Discount</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("AdminContact")" asp-controller="AdminContact" asp-action="Index">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white @Active("Account")" asp-controller="Account" asp-action="ChangePassword">Change Password</a>
+                    </li>
+                </ul>
+
+                <div class="mt-auto">
+                    <div class="small text-muted">Signed in as</div>
+                    <div class="fw-bold">@adminName</div>
+                    <div class="mt-2 d-flex gap-2">
+                        <form asp-controller="Admin" asp-action="Logout" method="post" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex-grow-1 page-area">
+            <nav class="navbar navbar-expand bg-white shadow-sm">
+                <div class="container-fluid">
+                    <button class="btn btn-outline-secondary d-md-none" id="toggleSidebar">☰</button>
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted">Welcome, <strong>@adminName</strong></span>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="container-fluid p-4 content-area">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            $('#toggleSidebar').on('click', function () {
+                $('#sidebar').toggleClass('collapsed');
+            });
+
+            $('#sidebar .nav-link').on('click', function () {
+                $('#sidebar .nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+        })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

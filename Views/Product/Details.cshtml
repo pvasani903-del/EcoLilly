@@ -1,0 +1,84 @@
+﻿@model EcoLilly.Models.Product
+
+<section class="bg-white min-h-screen py-12">
+    <div class="max-w-7xl mx-auto px-4">
+
+        <a asp-action="Index" class="text-gray-600 hover:text-green-600 mb-8 inline-block">
+            ← Back to Products
+        </a>
+
+        <div class="grid md:grid-cols-2 gap-12">
+
+            <div>
+                <img src="@Model.Image"
+                     class="w-full h-[500px] object-cover rounded-2xl shadow-xl" />
+            </div>
+
+            <div class="space-y-6">
+
+                <p class="text-sm text-green-600 font-semibold uppercase">
+                    @Model.Category
+                </p>
+
+                <h1 class="text-4xl font-bold text-gray-900">
+                    @Model.Name
+                </h1>
+
+                <div class="flex items-center space-x-4">
+                    <span class="text-5xl font-bold text-gray-900">
+                        ₹@Model.Price
+                    </span>
+
+                    @if (Model.InStock)
+                    {
+                        <span class="text-green-600 font-semibold">
+                            ✔ In Stock
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-red-600 font-semibold">
+                            Out of Stock
+                        </span>
+                    }
+                </div>
+
+                <p class="text-lg text-gray-600">
+                    @Model.Description
+                </p>
+
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">
+                        🌿 Eco Features
+                    </h3>
+
+                    <ul class="mt-3 space-y-2">
+                        @foreach (var feature in Model.EcoFeatures.Split(','))
+                        {
+                            <li class="text-gray-700">
+                                ✔ @feature
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="flex gap-4">
+                    <a asp-controller="Cart"
+                       asp-action="Add"
+                       asp-route-id="@Model.Id"
+                       class="flex-1 bg-green-600 text-white py-4 rounded-full text-center font-semibold hover:bg-green-700">
+                        🛒 Add to Cart
+                    </a>
+
+                    <a asp-controller="Wishlist"
+                       asp-action="Add"
+                       asp-route-id="@Model.Id"
+                       class="bg-red-50 text-red-600 px-6 py-4 rounded-full border-2 border-red-200">
+                        ❤️ Save
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>

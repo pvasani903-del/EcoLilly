@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+
+    <div class="bg-white shadow-2xl rounded-xl flex w-full max-w-4xl overflow-hidden">
+
+        <!-- LEFT PANEL -->
+        <div class="w-2/5 bg-gradient-to-br from-green-600 to-emerald-700 text-white p-8 text-center flex flex-col justify-center">
+            <h2 class="text-3xl font-bold mb-4">🌿 EcoLilly</h2>
+
+            <img src="~/images/img.jpg"
+                 class="rounded-xl shadow-lg mb-4 h-40 object-cover mx-auto" />
+
+            <p class="text-sm text-emerald-100">
+                Welcome back! Continue your eco-friendly journey with us.
+            </p>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="w-3/5 p-10">
+
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Sign In</h2>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="bg-red-100 text-red-600 p-3 rounded mb-4">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <!-- ✅ FORM -->
+            <form asp-controller="Account" asp-action="Login" method="post">
+
+                 @Html.AntiForgeryToken()  <!-- ✅ MUST ADD -->
+
+                <!-- EMAIL -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-1">Email</label>
+
+                    <input type="email"
+                           name="email"
+                           placeholder="you@example.com"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                           required />
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-1">Password</label>
+
+                    <div class="relative">
+                        <input type="password"
+                               id="loginPassword"
+                               name="password"
+                               placeholder="••••••••"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                               required />
+
+                        <button type="button"
+                                onclick="toggleLoginPassword()"
+                                class="absolute right-3 top-2 text-gray-500">
+                            👁
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FORGOT -->
+                <div class="text-right mb-4">
+                    <a asp-controller="Account"
+                       asp-action="ForgotPassword"
+                       class="text-sm text-green-600 hover:underline">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition">
+                    Sign In
+                </button>
+
+            </form>
+
+            <!-- REGISTER -->
+            <div class="mt-6 text-sm text-center">
+                Don't have an account?
+
+                <a asp-controller="Account"
+                   asp-action="Register"
+                   class="text-green-600 font-semibold">
+                    Register Here
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+    function toggleLoginPassword() {
+        var input = document.getElementById("loginPassword");
+        input.type = input.type === "password" ? "text" : "password";
+    }
+</script>

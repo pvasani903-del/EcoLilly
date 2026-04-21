@@ -1,0 +1,68 @@
+﻿@model EcoLilly.Models.Product
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="bg-white py-12">
+    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12">
+
+        <div>
+            <img src="@Model.Image"
+                 class="w-full h-[500px] object-cover rounded-2xl shadow-xl" />
+        </div>
+
+        <div class="space-y-6">
+
+            <p class="text-green-600 font-semibold uppercase">@Model.Category</p>
+
+            <h1 class="text-4xl font-bold">@Model.Name</h1>
+
+            <div class="flex items-center space-x-4">
+                <span class="text-5xl font-bold">₹@Model.Price</span>
+
+                @if (Model.InStock)
+                {
+                    <span class="text-green-600 font-semibold">✔ In Stock</span>
+                }
+                else
+                {
+                    <span class="text-red-600 font-semibold">Out of Stock</span>
+                }
+            </div>
+
+            <p class="text-gray-600 text-lg">@Model.Description</p>
+
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h3 class="font-bold mb-2">Eco Features</h3>
+                @{
+                    var features = Model.EcoFeatures?.Split(',');
+                }
+                @if (features != null)
+                {
+                    foreach (var f in features)
+                    {
+                        <p>✔ @f</p>
+                    }
+                }
+            </div>
+
+            <div class="flex gap-4">
+
+                <a asp-controller="Cart"
+                   asp-action="AddToCart"
+                   asp-route-id="@Model.Id"
+                   class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Add To Cart
+                </a>
+
+                <a asp-controller="Wishlist" asp-action="Add" asp-route-id="@Model.Id"
+                   class="bg-red-100 text-red-600 px-6 py-3 rounded-full">
+                    ❤️ Save
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

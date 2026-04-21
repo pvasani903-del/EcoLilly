@@ -1,0 +1,207 @@
+﻿/* ===== PAGE BACKGROUND ===== */
+body {
+    background: linear-gradient(to right, #dcefe3, #eaf4ee);
+    font-family: 'Segoe UI', sans-serif;
+    overflow-x: hidden; /* allow vertical scroll */
+}
+
+/* ===== WRAPPER ===== */
+.register-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px; /* increased spacing */
+}
+
+/* ===== CARD ===== */
+.register-card {
+    width: 1000px;
+    max-width: 95%;
+    display: flex;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    background: #fff;
+}
+
+/* ===== LEFT SIDE ===== */
+.left-side {
+    width: 45%;
+    background: linear-gradient(135deg, #1e8e4d, #166534);
+    color: white;
+    text-align: center;
+    padding: 50px 30px;
+}
+
+    .left-side .brand {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
+
+    .left-side .image-box img {
+        width: 170px;
+        height: 170px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .left-side h3 {
+        margin-top: 10px;
+    }
+
+    .left-side p {
+        font-size: 14px;
+        margin: 10px 0 20px;
+    }
+
+    .left-side ul {
+        list-style: none;
+        padding: 0;
+        font-size: 14px;
+    }
+
+        .left-side ul li {
+            margin-bottom: 8px;
+        }
+
+/* ===== RIGHT SIDE ===== */
+.right-side {
+    width: 55%;
+    padding: 50px;
+}
+
+    .right-side h2 {
+        margin-bottom: 5px;
+    }
+
+.subtitle {
+    color: gray;
+    margin-bottom: 25px;
+}
+
+/* ===== FORM ===== */
+.right-side form {
+    display: flex;
+    flex-direction: column;
+}
+
+.right-side label {
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 5px;
+}
+
+.right-side input {
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 0 12px;
+    font-size: 14px;
+}
+
+    .right-side input:focus {
+        border-color: #1e8e4d;
+        outline: none;
+        box-shadow: 0 0 5px rgba(30,142,77,0.2);
+    }
+
+/* ===== PASSWORD BOX ===== */
+.password-box {
+    position: relative;
+}
+
+    .password-box input {
+        width: 100%;
+        padding-right: 40px;
+    }
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* Password row */
+.row {
+    display: flex;
+    gap: 15px;
+}
+
+    .row .col {
+        flex: 1;
+    }
+
+/* ===== UPLOAD STYLE (New Browse Version) ===== */
+.upload-container {
+    margin-top: 8px;
+}
+
+.upload-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.browse-btn {
+    background: #1e8e4d;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .browse-btn:hover {
+        background: #14532d;
+    }
+
+/* ===== BUTTON ===== */
+.btn-register {
+    margin-top: 20px;
+    padding: 14px;
+    background: #1e8e4d;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+    .btn-register:hover {
+        background: #14532d;
+    }
+
+/* ===== LOGIN LINK ===== */
+.login-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+    .login-link a {
+        color: #1e8e4d;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .register-card {
+        flex-direction: column;
+    }
+
+    .left-side,
+    .right-side {
+        width: 100%;
+    }
+
+    .right-side {
+        padding: 30px;
+    }
+}

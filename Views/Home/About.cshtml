@@ -1,0 +1,113 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "About";
+    var isPreview = ViewBag.IsPreview != null && (bool)ViewBag.IsPreview;
+}
+
+<section class="py-16 bg-gradient-to-b from-white to-green-50">
+    <div class="max-w-7xl mx-auto px-4">
+
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                @(isPreview ? "Why Choose EcoLiving?" : "Our Mission")
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                We're committed to making sustainable living accessible, affordable, and beautiful.
+            </p>
+        </div>
+
+        <!-- Features -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    🌿
+                </div>
+                <h3 class="text-xl font-bold">100% Sustainable</h3>
+                <p class="text-gray-600">
+                    Every product is carefully selected for sustainability.
+                </p>
+            </div>
+
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    ❤️
+                </div>
+                <h3 class="text-xl font-bold">Ethically Sourced</h3>
+                <p class="text-gray-600">
+                    We partner with fair-trade suppliers.
+                </p>
+            </div>
+
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    🌍
+                </div>
+                <h3 class="text-xl font-bold">Carbon Neutral</h3>
+                <p class="text-gray-600">
+                    All shipping is carbon-neutral.
+                </p>
+            </div>
+
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    👥
+                </div>
+                <h3 class="text-xl font-bold">Community Driven</h3>
+                <p class="text-gray-600">
+                    Join thousands making positive impact.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Full Section (Not Preview Mode) -->
+        @if (!isPreview)
+        {
+            <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+                    <div>
+                        <img src="https://images.pexels.com/photos/5029859/pexels-photo-5029859.jpeg?auto=compress&cs=tinysrgb&w=800"
+                             class="rounded-xl shadow-lg"
+                             alt="Eco Lifestyle" />
+                    </div>
+
+                    <div class="space-y-6">
+                        <h3 class="text-3xl font-bold text-gray-900">Our Story</h3>
+
+                        <p class="text-gray-600 leading-relaxed">
+                            EcoLiving was founded in 2020 with a simple mission:
+                            make sustainable living easy and accessible for everyone.
+                        </p>
+
+                        <p class="text-gray-600 leading-relaxed">
+                            We've helped plant over 50,000 trees and built a community
+                            of conscious consumers who care about the planet.
+                        </p>
+
+                        <div class="grid grid-cols-3 gap-4 pt-4">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-green-600">50K+</p>
+                                <p class="text-sm text-gray-600">Trees Planted</p>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-green-600">100K+</p>
+                                <p class="text-sm text-gray-600">Products Sold</p>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-green-600">25K+</p>
+                                <p class="text-sm text-gray-600">Happy Customers</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</section>

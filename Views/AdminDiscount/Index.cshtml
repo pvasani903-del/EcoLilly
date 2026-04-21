@@ -1,0 +1,63 @@
+@model IEnumerable<EcoLilly.Models.Discount>
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Discounts</h4>
+    <a class="btn btn-primary" href="@Url.Action("Create","AdminDiscount")">Add Discount</a>
+</div>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Search code..." />
+        <button class="btn btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">@TempData["success"]</div>
+}
+
+<table class="table table-striped table-responsive">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Code</th>
+            <th>Percentage</th>
+            <th>Expiry</th>
+            <th>Active</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.Id</td>
+                <td>@d.Code</td>
+                <td>@d.Percentage %</td>
+                <td>@(d.ExpiryDate == default ? "-" : d.ExpiryDate.ToString("yyyy-MM-dd"))</td>
+                <td>
+                    <form asp-controller="AdminDiscount" asp-action="Toggle" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@d.Id" />
+                        <button type="submit" class="btn btn-sm @(d.IsActive ? "btn-success" : "btn-outline-secondary")">
+                            @(d.IsActive ? "Yes" : "No")
+                        </button>
+                    </form>
+                </td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-warning me-1" asp-controller="AdminDiscount" asp-action="Edit" asp-route-id="@d.Id">Edit</a>
+
+                    <form asp-controller="AdminDiscount" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this discount?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@d.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

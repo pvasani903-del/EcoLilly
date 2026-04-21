@@ -1,0 +1,205 @@
+body {
+    background: #f4f6f8;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Container */
+
+.checkout-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+/* Title */
+
+.checkout-title {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 35px;
+    color: #1b5e20;
+}
+
+/* Grid Layout */
+
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 35px;
+}
+
+/* Cards */
+
+.checkout-left,
+.checkout-right {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+    /* Section Titles */
+
+    .checkout-left h3,
+    .checkout-right h3 {
+        font-size: 22px;
+        margin-bottom: 18px;
+        color: #333;
+    }
+
+    /* Inputs */
+
+    .checkout-left input,
+    .checkout-left textarea {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+        margin-bottom: 16px;
+        transition: 0.3s;
+    }
+
+        .checkout-left input:focus,
+        .checkout-left textarea:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 5px rgba(40,167,69,0.2);
+            outline: none;
+        }
+
+    /* Textarea */
+
+    .checkout-left textarea {
+        height: 90px;
+        resize: none;
+    }
+
+/* Payment */
+
+.payment-methods {
+    margin-top: 15px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .payment-option:hover {
+        background: #f3fff5;
+        border-color: #28a745;
+    }
+
+/* Order Table */
+
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+    .checkout-table th {
+        background: #f8f8f8;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .checkout-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+/* Coupon Section */
+
+.coupon-box {
+    margin-top: 20px;
+}
+
+    .coupon-box form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .coupon-box input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+/* Apply Button */
+
+.apply-btn {
+    background: #ff9800;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .apply-btn:hover {
+        background: #e68900;
+    }
+
+.coupon-error {
+    color: red;
+    margin-top: 5px;
+}
+
+/* Bill Summary */
+
+.bill-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.total-row {
+    font-weight: bold;
+    font-size: 20px;
+    color: #28a745;
+}
+
+/* Place Order Button */
+
+.place-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+    border: none;
+    background: linear-gradient(45deg,#28a745,#2ecc71);
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .place-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+/* Responsive */
+
+@media(max-width:900px) {
+
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-container {
+        padding: 10px;
+    }
+}

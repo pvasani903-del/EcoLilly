@@ -1,0 +1,36 @@
+@model EcoLilly.Models.Discount
+@{
+    Layout = "_AdminLayout";
+}
+<h4>Edit Discount</h4>
+
+<form method="post" asp-controller="AdminDiscount" asp-action="Edit" asp-route-id="@Model.Id">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">Code</label>
+        <input asp-for="Code" class="form-control" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Percentage</label>
+        <input asp-for="Percentage" class="form-control" type="number" min="0" max="100" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Expiry Date</label>
+        <input asp-for="ExpiryDate" class="form-control" type="date" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label class="form-check-label">Is Active</label>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-success">Save</button>
+        <a class="btn btn-secondary" asp-controller="AdminDiscount" asp-action="Index">Back</a>
+    </div>
+</form>

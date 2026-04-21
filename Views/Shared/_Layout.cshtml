@@ -1,0 +1,208 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - EcoLiving</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+<body class="bg-gray-50">
+
+    @{
+        var wishlistCount = Context.Session.GetInt32("WishlistCount") ?? 0;
+        var cartCount = Context.Session.GetInt32("CartCount") ?? 0;
+        var userEmail = Context.Session.GetString("UserEmail") ?? "";
+        var userName = Context.Session.GetString("UserName") ?? "Guest";
+        var userProfile = Context.Session.GetString("UserProfileImage") ?? "/images/default-avatar.png";
+    }
+
+    <!-- HEADER -->
+    <header class="bg-white shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
+
+            <!-- LOGO -->
+            <a asp-controller="Home" asp-action="Index" class="text-xl font-bold text-green-700 flex items-center gap-2">
+                🌿 EcoLiving
+            </a>
+
+            <!-- NAV -->
+            <nav class="hidden md:flex space-x-6 text-gray-700 font-medium">
+                <a asp-controller="Home" asp-action="Index" class="hover:text-green-600">Home</a>
+                <a asp-controller="Shop" asp-action="Index" class="hover:text-green-600">Shop</a>
+                <a asp-controller="Home" asp-action="About" class="hover:text-green-600">About</a>
+                <a asp-controller="Home" asp-action="Contact" class="hover:text-green-600">Contact</a>
+            </nav>
+
+            <!-- RIGHT SIDE -->
+            <div class="flex items-center space-x-5">
+
+                <!-- SEARCH -->
+                <form asp-controller="Shop" asp-action="Index" method="get" class="hidden md:flex">
+                    <input name="q" placeholder="Search products..." class="border rounded-l px-3 py-1 focus:outline-none" />
+                    <button class="bg-green-600 text-white px-3 rounded-r">Search</button>
+                </form>
+
+                <!-- WISHLIST -->
+                <a asp-controller="Wishlist" asp-action="Index" class="relative text-xl">
+                    ❤️
+                    @if (wishlistCount > 0)
+                    {
+                        <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1 rounded-full">@wishlistCount</span>
+                    }
+                </a>
+
+                <!-- CART -->
+                <a asp-controller="Cart" asp-action="Index" class="relative text-xl">
+                    🛒
+                    @if (cartCount > 0)
+                    {
+                        <span class="absolute -top-2 -right-3 bg-green-600 text-white text-xs px-1 rounded-full">@cartCount</span>
+                    }
+                </a>
+
+                <!-- USER DROPDOWN -->
+                @if (!string.IsNullOrEmpty(userEmail))
+                {
+                    <div class="relative">
+
+                        <!-- BUTTON -->
+                        <button onclick="toggleDropdown(event)" class="flex items-center gap-2 focus:outline-none">
+                            <img src="@userProfile" class="w-9 h-9 rounded-full border-2 border-green-500 object-cover" />
+                            <span class="hidden md:block font-medium">@userName</span>
+                        </button>
+
+                        <!-- DROPDOWN -->
+                        <div id="userDropdown"
+                             class="absolute right-0 mt-3 w-56 bg-white border rounded-xl shadow-lg hidden overflow-hidden transform scale-95 opacity-0 transition-all duration-200">
+
+                            <!-- USER INFO -->
+                            <div class="p-3 border-b flex items-center gap-3 bg-gray-50">
+                                <img src="@userProfile" class="w-10 h-10 rounded-full object-cover" />
+                                <div>
+                                    <p class="font-semibold text-gray-800">@userName</p>
+                                    <p class="text-xs text-gray-500">@userEmail</p>
+                                </div>
+                            </div>
+
+                            <!-- MENU -->
+                            <div class="py-2 text-gray-700 text-sm">
+
+                                <a asp-controller="Account" asp-action="Dashboard"
+                                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+                                    🏠 Dashboard
+                                </a>
+
+                                <a asp-controller="Account" asp-action="EditProfile"
+                                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+                                    👤 Edit Profile
+                                </a>
+
+                                <a asp-controller="Order" asp-action="Index"
+                                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+                                    📦 Orders
+                                </a>
+
+                                <a asp-controller="Account" asp-action="ChangePassword"
+                                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+                                    🔑 Change Password
+                                </a>
+
+                                <hr class="my-2">
+
+                                <a asp-controller="Account" asp-action="Logout"
+                                   class="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50">
+                                    🚪 Logout
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="hidden md:block text-gray-700 hover:text-green-600">Sign In</a>
+                    <a asp-controller="Account" asp-action="Register" class="hidden md:block bg-green-600 text-white px-4 py-1 rounded">Join Us</a>
+                }
+
+                <!-- MOBILE BUTTON -->
+                <button onclick="toggleMenu()" class="md:hidden text-2xl">☰</button>
+
+            </div>
+        </div>
+
+        <!-- MOBILE MENU -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+            <div class="flex flex-col px-6 py-4 space-y-3">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                <a asp-controller="Shop" asp-action="Index">Shop</a>
+                <a asp-controller="Home" asp-action="About">About</a>
+                <a asp-controller="Home" asp-action="Contact">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="min-h-screen">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8">
+            <div>
+                <h2 class="text-xl font-bold mb-3">EcoLiving</h2>
+                <p class="text-gray-400">Eco-friendly products for a greener planet 🌿</p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-3">Quick Links</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">Shop</a></li>
+                    <li><a asp-controller="Home" asp-action="About">About</a></li>
+                    <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-3">Contact</h3>
+                <p class="text-gray-400">📧 ecolilly@gmail.com</p>
+                <p class="text-gray-400">📞 +91 98765 43210</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        function toggleMenu() {
+            document.getElementById("mobileMenu").classList.toggle("hidden");
+        }
+
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById("userDropdown");
+
+            dropdown.classList.toggle("hidden");
+            dropdown.classList.toggle("opacity-0");
+            dropdown.classList.toggle("scale-95");
+        }
+
+        // Close dropdown on outside click
+        window.addEventListener("click", function () {
+            const dropdown = document.getElementById("userDropdown");
+            if (dropdown && !dropdown.classList.contains("hidden")) {
+                dropdown.classList.add("hidden", "opacity-0", "scale-95");
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

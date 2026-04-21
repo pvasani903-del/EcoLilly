@@ -1,0 +1,44 @@
+@model EcoLilly.Models.CartItem
+@{
+    Layout = "_AdminLayout";
+    var products = ViewBag.Products as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="mb-3">Edit Cart Item</h4>
+
+        <form asp-controller="AdminCart" asp-action="Edit" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <div class="col-md-6">
+                <label class="form-label">Product</label>
+                <select name="productId" class="form-select" required>
+                    @foreach (var p in products)
+                    {
+                        if (p.Id == Model.ProductId)
+                        {
+                            <option value="@p.Id" selected>@p.Name (@string.Format("?{0:N2}", p.Price))</option>
+                        }
+                        else
+                        {
+                            <option value="@p.Id">@p.Name (@string.Format("?{0:N2}", p.Price))</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Quantity</label>
+                <input type="number" name="quantity" value="@Model.Quantity" min="1" class="form-control" />
+            </div>
+
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success">Save</button>
+                    <a class="btn btn-secondary" asp-controller="AdminCart" asp-action="Details" asp-route-userEmail="@Model.UserEmail">Back</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

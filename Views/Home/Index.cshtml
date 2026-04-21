@@ -1,0 +1,151 @@
+﻿@model List<EcoLilly.Models.Product>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<link rel="stylesheet" href="~/css/home.css" />
+
+<!-- HERO SECTION -->
+<section class="hero">
+
+    <div class="container hero-container">
+
+        <div class="hero-text">
+
+            <h1>Eco Friendly <span>Living</span></h1>
+
+            <p>
+                Discover sustainable products that help protect the planet.
+                Make your lifestyle greener with EcoLiving.
+            </p>
+
+            <div class="hero-buttons">
+                <a asp-controller="Shop" asp-action="Index" class="btn-primary">Shop Now</a>
+                <a asp-controller="Home" asp-action="About" class="btn-outline">Learn More</a>
+            </div>
+
+        </div>
+
+        <div class="hero-image">
+            <img src="https://tse1.mm.bing.net/th/id/OIP.VrnvhKMp_vkk7v0-VILvSAHaE8?pid=Api&P=0&h=180" alt="Eco Products" />
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CATEGORY SECTION -->
+
+<section class="categories">
+
+    <div class="container">
+
+        <h2>Shop By Category</h2>
+
+        <div class="category-grid">
+
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Bamboo" class="category-card">
+                <span>🌿</span>
+                <h3>Bamboo Products</h3>
+            </a>
+
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Bags" class="category-card">
+                <span>🛍</span>
+                <h3>Reusable Bags</h3>
+            </a>
+
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Care" class="category-card">
+                <span>🧴</span>
+                <h3>Organic Care</h3>
+            </a>
+
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Home" class="category-card">
+                <span>🏠</span>
+                <h3>Eco Home</h3>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FEATURED PRODUCTS -->
+
+<section class="products">
+
+    <div class="container">
+
+        <div class="product-header">
+
+            <h2>Featured Products</h2>
+
+            <a asp-controller="Shop" asp-action="Index">View All</a>
+
+        </div>
+
+        <div class="product-grid">
+
+            @foreach (var p in Model.Take(4))
+            {
+                <div class="product-card">
+
+                    <img src="@p.Image" alt="@p.Name" />
+
+                    <h3>@p.Name</h3>
+
+                    <p class="price">₹@p.Price</p>
+
+                    <a asp-controller="Cart"
+                       asp-action="AddToCart"
+                       asp-route-id="@p.Id"
+                       class="btn-cart">
+                        Add To Cart
+                    </a>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- WHY CHOOSE US -->
+
+<section class="why">
+
+    <div class="container">
+
+        <h2>Why Choose EcoLiving?</h2>
+
+        <div class="why-grid">
+
+            <div class="why-card">
+                <div class="icon">🌍</div>
+                <h3>Eco Friendly</h3>
+                <p>All products are sustainable and environmentally safe.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="icon">🚚</div>
+                <h3>Fast Delivery</h3>
+                <p>Quick and reliable shipping across India.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="icon">🌱</div>
+                <h3>Sustainable Living</h3>
+                <p>Helping you reduce waste and protect the planet.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

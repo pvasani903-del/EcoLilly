@@ -1,0 +1,41 @@
+@model EcoLilly.Models.Contact
+@{
+    Layout = "_AdminLayout";
+}
+
+<h4>Edit Contact Message</h4>
+
+<form method="post" asp-controller="AdminContact" asp-action="Edit" asp-route-id="@Model.Id">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Subject</label>
+        <input asp-for="Subject" class="form-control" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Message</label>
+        <textarea asp-for="Message" class="form-control" rows="6"></textarea>
+        <span asp-validation-for="Message" class="text-danger"></span>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success">Save</button>
+        <a class="btn btn-secondary" asp-controller="AdminContact" asp-action="Index">Back</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.13/jquery.validate.unobtrusive.min.js"></script>
+}

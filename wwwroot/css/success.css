@@ -1,0 +1,58 @@
+﻿.success-container {
+    max-width: 650px;
+    margin: 80px auto;
+    text-align: center;
+    font-family: Arial;
+}
+
+.success-icon {
+    font-size: 80px;
+}
+
+.success-title {
+    color: #28a745;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.success-msg {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.bill-card {
+    border: 1px solid #eee;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 25px;
+    background: #f9fff9;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.bill-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+.total-row {
+    font-size: 20px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.btn-success {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 14px 30px;
+    background: #28a745;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    .btn-success:hover {
+        background: #218838;
+    }

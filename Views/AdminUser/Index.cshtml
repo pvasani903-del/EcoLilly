@@ -1,0 +1,61 @@
+@model IEnumerable<EcoLilly.Models.User>
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="m-0">Users</h4>
+    <a class="btn btn-primary" href="/AdminUser/Create">Add User</a>
+</div>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Search by name..." />
+        <button class="btn btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">@TempData["success"]</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No users found</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.Id</td>
+                        <td>@u.Name</td>
+                        <td>@u.Email</td>
+                        <td>@u.Phone</td>
+                        <td>@u.Address</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info me-1" href="/AdminUser/Edit/@u.Id">Edit</a>
+                            <a class="btn btn-sm btn-danger" href="/AdminUser/Delete/@u.Id" onclick="return confirm('Delete this user?');">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

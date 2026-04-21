@@ -1,0 +1,105 @@
+﻿@model List<EcoLilly.Models.WishlistItem>
+
+<link href="~/css/wishlist.css" rel="stylesheet" />
+
+<div class="wishlist-container">
+
+    @if (!Model.Any())
+    {
+        <div class="empty-wishlist">
+            <div class="heart-icon">❤</div>
+            <h2>Your Wishlist is Empty</h2>
+
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="continue-btn">
+                Continue Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="wishlist-header">
+            <h2>❤ My Wishlist (@Model.Count)</h2>
+        </div>
+
+        <div class="wishlist-grid">
+
+            @foreach (var item in Model)
+            {
+                var features = item.EcoFeatures?.Split(',');
+
+                <div class="wishlist-card">
+
+                    <!-- IMAGE -->
+                    <div class="image-section">
+
+                        <img src="@item.Image" alt="@item.Name" />
+
+                        <a asp-controller="Wishlist"
+                           asp-action="Remove"
+                           asp-route-id="@item.ProductId"
+                           class="remove-btn">
+                            ❤
+                        </a>
+
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body">
+
+                        <h3>@item.Name</h3>
+
+                        <p class="description">
+                            @item.Description
+                        </p>
+
+                        <div class="features">
+                            @if (features != null)
+                            {
+                                foreach (var f in features.Take(2))
+                                {
+                                    <span>@f</span>
+                                }
+                            }
+                        </div>
+
+                        <div class="price">
+                            ₹@item.Price
+                        </div>
+
+                        <div class="btn-group">
+
+                            <a asp-controller="Wishlist"
+                               asp-action="AddToCart"
+                               asp-route-id="@item.ProductId"
+                               class="cart-btn">
+                                Add To Cart
+                            </a>
+
+                            <a asp-controller="Shop"
+                               asp-action="Details"
+                               asp-route-id="@item.ProductId"
+                               class="view-btn">
+                                View Product
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        <br />
+
+        <a asp-controller="Shop"
+           asp-action="Index"
+           class="continue-btn">
+            Back To Shop
+        </a>
+    }
+
+</div>

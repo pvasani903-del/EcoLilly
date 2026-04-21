@@ -1,0 +1,109 @@
+﻿@model List<EcoLilly.Models.CartItem>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+}
+
+<div class="cart-container">
+
+    <h2 class="cart-title">Shopping Cart</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-cart">
+
+            <div class="cart-icon">🛒</div>
+
+            <h3>Your Cart is Empty</h3>
+
+            <p>Looks like you haven't added anything yet.</p>
+
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="continue-shopping">
+                Continue Shopping
+            </a>
+
+        </div>
+    }
+    else
+    {
+
+        <div class="cart-list">
+
+            @foreach (var item in Model)
+            {
+                if (item.Product != null)
+                {
+
+                    <div class="cart-item">
+
+                        <img src="@item.Product.Image" class="cart-img" />
+
+                        <div class="cart-details">
+
+                            <h4>@item.Product.Name</h4>
+
+                            <p class="price">₹@item.Product.Price</p>
+
+                            <div class="qty-section">
+
+                                <a asp-controller="Cart"
+                                   asp-action="Decrease"
+                                   asp-route-id="@item.Id"
+                                   class="qty-btn minus">-</a>
+
+                                <span class="qty-count">@item.Quantity</span>
+
+                                <a asp-controller="Cart"
+                                   asp-action="Increase"
+                                   asp-route-id="@item.Id"
+                                   class="qty-btn plus">+</a>
+
+                            </div>
+
+                            <p class="item-total">
+                                Item Total ₹ @(item.Product.Price* item.Quantity)
+                            </p>
+
+                            <a asp-controller="Cart"
+                               asp-action="Remove"
+                               asp-route-id="@item.Id"
+                               class="remove-btn">
+                                Remove
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                }
+            }
+
+        </div>
+
+        <div class="cart-summary">
+
+            <div class="total">
+                Grand Total ₹ @(Model.Sum(i => i.Product.Price * i.Quantity))
+            </div>
+
+            <a asp-controller="Cart"
+               asp-action="Checkout"
+               class="checkout-btn">
+                Proceed To Checkout
+            </a>
+
+        </div>
+
+        <br />
+
+        <a asp-controller="Shop"
+           asp-action="Index"
+           class="continue-btn">
+            Continue Shopping
+        </a>
+
+    }
+
+</div>

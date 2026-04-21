@@ -1,0 +1,56 @@
+@model EcoLilly.Models.Contact
+@{
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-3">Contact Us</h2>
+
+            @if (TempData["ContactSuccess"] != null)
+            {
+                <div class="alert alert-success">@TempData["ContactSuccess"]</div>
+            }
+
+            <form method="post" asp-controller="Contact" asp-action="Index">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Subject</label>
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea asp-for="Message" class="form-control" rows="6"></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Send Message</button>
+                    <a class="btn btn-secondary" href="/">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.13/jquery.validate.unobtrusive.min.js"></script>
+}

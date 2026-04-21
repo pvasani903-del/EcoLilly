@@ -1,0 +1,72 @@
+﻿@model EcoLilly.Models.User
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-10">
+
+    <h2 class="text-2xl font-bold text-green-700 mb-6">
+        👤 Edit Profile
+    </h2>
+
+    <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Profile Image -->
+
+        <div class="mb-6 text-center">
+
+            <img src="@Model.ProfileImage"
+                 class="w-24 h-24 rounded-full mx-auto border-4 border-green-500 object-cover mb-3" />
+
+            <input type="file" name="ProfilePhoto" class="mx-auto block" />
+
+        </div>
+
+        <!-- Name -->
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Name</label>
+            <input asp-for="Name"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <!-- Email -->
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Email</label>
+            <input asp-for="Email"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <!-- Phone -->
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Phone</label>
+            <input asp-for="Phone"
+                   class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <!-- Address -->
+
+        <div class="mb-6">
+            <label class="block font-semibold mb-1">Address</label>
+            <textarea asp-for="Address"
+                      class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+        </div>
+
+        <!-- Button -->
+
+        <button type="submit"
+                class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+
+            Update Profile
+
+        </button>
+
+    </form>
+
+</div>

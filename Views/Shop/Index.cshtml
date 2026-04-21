@@ -1,0 +1,147 @@
+﻿@model List<EcoLilly.Models.Product>
+
+@{
+    var categories = ViewBag.Categories as List<string>;
+}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <div class="grid grid-cols-12 gap-6">
+
+        <!-- FILTER PANEL -->
+        <div class="col-span-3">
+
+            <div class="bg-white p-5 rounded-xl shadow-md">
+
+                <form method="get" asp-controller="Shop" asp-action="Index">
+
+                    <h3 class="font-bold text-lg mb-4">Categories</h3>
+
+                    <div class="space-y-2 mb-6">
+
+                        <label>
+                            <input type="radio" name="category" value="all" checked>
+                            All Products
+                        </label>
+
+                        @foreach (var c in categories)
+                        {
+                            <div>
+                                <label>
+                                    <input type="radio" name="category" value="@c">
+                                    @c
+                                </label>
+                            </div>
+                        }
+
+                    </div>
+
+
+                    <h3 class="font-bold text-lg mb-3">Price Range</h3>
+
+                    <div class="flex gap-2 mb-6">
+
+                        <input type="number"
+                               name="minPrice"
+                               placeholder="0"
+                               class="border p-2 w-1/2 rounded">
+
+                        <input type="number"
+                               name="maxPrice"
+                               placeholder="100000"
+                               class="border p-2 w-1/2 rounded">
+
+                    </div>
+
+
+                    <h3 class="font-bold text-lg mb-3">Search</h3>
+
+                    <input type="text"
+                           name="q"
+                           placeholder="Search product..."
+                           class="border p-2 w-full rounded mb-6">
+
+
+                    <button type="submit"
+                            class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                        Apply Filters
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PRODUCTS -->
+        <div class="col-span-9">
+
+            <div class="grid grid-cols-3 gap-6">
+
+                @foreach (var product in Model)
+                {
+                    <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg relative">
+
+                        <!-- WISHLIST -->
+                        <a asp-controller="Wishlist"
+                           asp-action="Add"
+                           asp-route-id="@product.Id"
+                           class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-xl">
+                            ❤️
+                        </a>
+
+                        <!-- PRODUCT IMAGE -->
+                        <img src="@product.Image"
+                             class="w-full h-48 object-cover rounded-lg" />
+
+                        <p class="text-sm text-gray-400 mt-2">
+                            @product.Category
+                        </p>
+
+                        <h3 class="font-semibold text-lg">
+                            @product.Name
+                        </h3>
+
+                        <p class="text-gray-500 text-sm">
+                            @product.Description
+                        </p>
+
+                        <div class="flex justify-between items-center mt-3">
+
+                            <span class="text-green-700 font-bold">
+                                ₹@product.Price
+                            </span>
+
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="flex gap-2 mt-3">
+
+                            <a asp-controller="Cart"
+                               asp-action="AddToCart"
+                               asp-route-id="@product.Id"
+                               class="flex-1 bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700">
+                                Add to Cart
+                            </a>
+
+                            <a asp-controller="Shop"
+                               asp-action="Details"
+                               asp-route-id="@product.Id"
+                               class="flex-1 bg-gray-200 text-center py-2 rounded-lg hover:bg-gray-300">
+                                View Details
+                            </a>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

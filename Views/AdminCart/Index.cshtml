@@ -1,0 +1,55 @@
+@model List<EcoLilly.Controllers.AdminCartUserViewModel>
+@{
+    Layout = "_AdminLayout";
+}
+
+<h4>User Carts</h4>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Search products..." />
+        <button class="btn btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">@TempData["success"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User Email</th>
+            <th>Items Count</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="3" class="text-center text-muted">No cart entries</td></tr>
+        }
+        else
+        {
+            foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.UserEmail</td>
+                    <td>@u.ItemsCount</td>
+                    <td class="text-end">
+                        <!-- View details in admin -->
+                        <a class="btn btn-sm btn-info me-2" asp-controller="AdminCart" asp-action="Details" asp-route-userEmail="@u.UserEmail">View</a>
+
+                        <!-- Clear user's cart -->
+                        <form asp-controller="AdminCart" asp-action="Clear" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userEmail" value="@u.UserEmail" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Clear entire cart for @u.UserEmail ?');">Clear</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

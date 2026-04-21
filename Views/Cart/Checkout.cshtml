@@ -1,0 +1,242 @@
+﻿@model List<EcoLilly.Models.CartItem>
+@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<link rel="stylesheet" href="~/css/checkout.css" />
+
+<div class="checkout-container">
+
+    <h2 class="checkout-title">Checkout</h2>
+
+    <form asp-controller="Cart" asp-action="PlaceOrder" method="post">
+
+        <div class="checkout-grid">
+
+            <!-- LEFT SIDE -->
+            <div class="checkout-left">
+
+                <h3>Customer Details</h3>
+
+                <input type="text" name="name" placeholder="Full Name" required />
+                <input type="text" name="phone" placeholder="Phone Number" required />
+                <textarea name="address" placeholder="Enter your address" required></textarea>
+
+                <!-- 🔥 MODERN PAYMENT UI -->
+                <h4 class="mt-4 mb-2 font-semibold text-lg">Payment Method</h4>
+
+                <div class="space-y-3">
+
+                    <!-- COD -->
+                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="paymentMethod" value="COD" checked onclick="showPaymentFields()" />
+                            <span class="font-medium">Cash On Delivery</span>
+                        </div>
+                        <span class="text-green-600">Free</span>
+                    </label>
+
+                    <!-- UPI -->
+                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="paymentMethod" value="UPI" onclick="showPaymentFields()" />
+                            <span class="font-medium">UPI Payment</span>
+                        </div>
+                        <span>📱</span>
+                    </label>
+
+                    <!-- UPI BOX -->
+                    <div id="upiSection" class="hidden border rounded-lg p-3 bg-gray-50">
+                        <input type="text" name="upiId" placeholder="Enter UPI ID (example@upi)"
+                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    </div>
+
+                    <!-- CARD -->
+                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="paymentMethod" value="CARD" onclick="showPaymentFields()" />
+                            <span class="font-medium">Debit / Credit Card</span>
+                        </div>
+                        <span>💳</span>
+                    </label>
+
+                    <!-- CARD BOX -->
+                    <div id="cardSection" class="hidden border rounded-lg p-3 bg-gray-50 space-y-2">
+
+                        <input type="text" name="cardName" placeholder="Card Holder Name"
+                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+
+                        <input type="text" name="cardNumber" placeholder="Card Number" maxlength="16"
+                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+
+                        <div class="flex gap-2">
+                            <input type="text" name="expiry" placeholder="MM/YY" maxlength="5"
+                                   class="w-1/2 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+
+                            <input type="text" name="cvv" placeholder="CVV" maxlength="3"
+                                   class="w-1/2 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="checkout-right">
+
+                <h3>Order Summary</h3>
+
+                <table class="checkout-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Product.Name</td>
+                                <td>₹@item.Product.Price</td>
+                                <td>@item.Quantity</td>
+                                <td>₹@(item.Product.Price * item.Quantity)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- COUPON -->
+                <div class="coupon-box">
+
+                    <select id="couponDropdown">
+                        <option value="">Select Offer</option>
+                        <option value="SAVE10">SAVE10 - 10% OFF</option>
+                        <option value="SAVE20">SAVE20 - 20% OFF</option>
+                        <option value="FEST50">FEST50 - 50% OFF</option>
+                    </select>
+
+                    <input type="text" id="couponCode" placeholder="Enter Coupon Code" />
+
+                    <button type="button" onclick="applyCoupon()" class="apply-btn">
+                        Apply
+                    </button>
+
+                </div>
+
+                @{
+                    var total = Model.Sum(i => i.Product.Price * i.Quantity);
+                }
+
+                <!-- BILL -->
+                <div class="bill-row">
+                    <span>Subtotal</span>
+                    <span>₹<span id="subtotal">@total</span></span>
+                </div>
+
+                <div class="bill-row">
+                    <span>Discount</span>
+                    <span>- ₹<span id="discount">0</span></span>
+                </div>
+
+                <div class="bill-row total-row">
+                    <span>Total Payment</span>
+                    <span>₹<span id="finalTotal">@total</span></span>
+                </div>
+
+                <button type="submit" class="place-btn">
+                    Place Order
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- 🔥 SCRIPTS -->
+<script>
+
+// SHOW PAYMENT UI
+function showPaymentFields() {
+
+    var method = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    document.getElementById("upiSection").classList.add("hidden");
+    document.getElementById("cardSection").classList.add("hidden");
+
+    if (method === "UPI") {
+        document.getElementById("upiSection").classList.remove("hidden");
+    }
+
+    if (method === "CARD") {
+        document.getElementById("cardSection").classList.remove("hidden");
+    }
+}
+
+// LOAD
+document.addEventListener("DOMContentLoaded", function () {
+
+    showPaymentFields();
+
+    document.getElementById("couponDropdown").addEventListener("change", function () {
+        var selected = this.value;
+        document.getElementById("couponCode").value = selected;
+
+        if (selected !== "") {
+            applyCoupon();
+        }
+    });
+
+});
+
+// COUPON
+function applyCoupon() {
+
+    var code =
+        document.getElementById("couponCode").value ||
+        document.getElementById("couponDropdown").value;
+
+    var subtotal =
+        parseFloat(document.getElementById("subtotal").innerText);
+
+    if (code === "") {
+        alert("Please select or enter coupon");
+        return;
+    }
+
+    fetch('/Order/ApplyCoupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, subtotal: subtotal })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.success) {
+            document.getElementById("discount").innerText =
+                parseFloat(data.discountAmount).toFixed(2);
+
+            document.getElementById("finalTotal").innerText =
+                parseFloat(data.finalAmount).toFixed(2);
+        }
+        else {
+            document.getElementById("discount").innerText = "0";
+            document.getElementById("finalTotal").innerText =
+                subtotal.toFixed(2);
+        }
+
+    });
+
+}
+
+</script>

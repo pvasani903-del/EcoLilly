@@ -1,0 +1,103 @@
+﻿@model EcoLilly.Models.DashboardViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h3>Welcome back, @Model.AdminName</h3>
+        <p class="text-muted">Overview of platform activity</p>
+    </div>
+    <div class="text-end">
+        <h5 class="text-success">₹@Model.TotalRevenue</h5>
+        <div class="text-muted">Total Revenue</div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Total Orders</div>
+            <div class="h4">@Model.TotalOrders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Total Products</div>
+            <div class="h4">@Model.TotalProducts</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Wishlist Items</div>
+            <div class="h4">@Model.WishlistCount</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Cart Items</div>
+            <div class="h4">@Model.CartCount</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card p-3">
+            <h5>Orders - Last 7 days</h5>
+            <canvas id="ordersChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Recent Orders</h5>
+            <ul class="list-group">
+                @if (Model.RecentOrders.Any())
+                {
+                    foreach (var o in Model.RecentOrders)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">#@o.Id • @o.CustomerName</div>
+                                <small class="text-muted">@o.OrderDate.ToString("yyyy-MM-dd")</small>
+                            </div>
+                            <div class="text-success">₹@o.TotalAmount</div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-center text-muted">No recent orders</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrdersByDayLabels));
+        const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrdersByDayTotals));
+
+        const ctx = document.getElementById('ordersChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales (₹)',
+                    data: data,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22,163,74,0.12)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+}
