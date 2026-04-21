@@ -151,7 +151,7 @@ namespace EcoLilly.Controllers
 
         // ================= PLACE ORDER =================
         [HttpPost]
-        public IActionResult PlaceOrder(string name, string phone, string address, string paymentMethod)
+        public IActionResult PlaceOrder(string name, string phone, string address, string paymentMethod, string? couponCode)
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
 
@@ -170,13 +170,28 @@ namespace EcoLilly.Controllers
 
             decimal total = cartItems.Sum(i => i.Product.Price * i.Quantity);
 
+            // ✅ APPLY SECURE COUPON DISCOUNT SERVER-SIDE
+            if (!string.IsNullOrEmpty(couponCode))
+            {
+                var discount = _context.Discounts.FirstOrDefault(d => 
+                    d.Code == couponCode && 
+                    d.IsActive && 
+                    d.ExpiryDate >= DateTime.Now);
+
+                if (discount != null)
+                {
+                    decimal discountAmount = total * discount.Percentage / 100;
+                    total -= discountAmount; // Apply the discount
+                }
+            }
+
             var order = new Order
             {
                 CustomerName = name,
                 Address = address,
                 Phone = phone,
                 UserEmail = userEmail,
-                TotalAmount = total,
+                TotalAmount = total, // Updated Total
                 OrderDate = DateTime.Now,
                 PaymentMethod = paymentMethod,
                 PaymentStatus = paymentMethod == "Online" ? "Paid" : "Pending"
@@ -198,7 +213,10 @@ namespace EcoLilly.Controllers
             // ✅ Clear cart
             _context.CartItems.RemoveRange(cartItems);
 
-            _context.SaveChanges();
+                _context.SaveChanges();
+
+            // Clear session cart count
+            HttpContext.Session.SetInt32("CartCount", 0);
 
             return RedirectToAction("Success");
         }

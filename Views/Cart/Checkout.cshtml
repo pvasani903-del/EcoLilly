@@ -11,7 +11,7 @@
 
     <h2 class="checkout-title">Checkout</h2>
 
-    <form asp-controller="Cart" asp-action="PlaceOrder" method="post">
+    <form asp-controller="Cart" asp-action="PlaceOrder" method="post" novalidate>
 
         <div class="checkout-grid">
 
@@ -123,7 +123,7 @@
                         <option value="FEST50">FEST50 - 50% OFF</option>
                     </select>
 
-                    <input type="text" id="couponCode" placeholder="Enter Coupon Code" />
+                    <input type="text" id="couponCode" name="couponCode" placeholder="Enter Coupon Code" />
 
                     <button type="button" onclick="applyCoupon()" class="apply-btn">
                         Apply
