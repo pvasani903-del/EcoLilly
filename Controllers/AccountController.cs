@@ -76,13 +76,15 @@ namespace EcoLilly.Controllers
         {
             // ===== ADMIN LOGIN =====
             var admin = _context.Admins
-                .FirstOrDefault(a => a.Email == email && a.Password == password);
+                .FirstOrDefault(a => a.Email == email);
 
-            if (admin != null)
+            // Wait, did they use the right password?
+            if (admin != null && admin.Password == password)
             {
                 HttpContext.Session.SetString("Role", "Admin");
-                HttpContext.Session.SetString("UserEmail", admin.Email);
-                HttpContext.Session.SetString("UserName", admin.Name ?? "Admin");
+                HttpContext.Session.SetString("AdminEmail", admin.Email); // Fixed: Make sure this uses "AdminEmail" so Change Password finds it securely
+                HttpContext.Session.SetString("UserEmail", admin.Email);  // Used for some fallback user logic
+                HttpContext.Session.SetString("UserName", admin.Name ?? admin.Username ?? "Admin");
                 HttpContext.Session.SetString("UserProfileImage", "/images/default-avatar.png");
 
                 return RedirectToAction("Index", "Admin");

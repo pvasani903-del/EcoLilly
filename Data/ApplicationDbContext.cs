@@ -24,7 +24,7 @@ namespace EcoLilly.Data
 
         // Discount / Coupon Table
         public DbSet<Discount> Discounts { get; set; }
-
+        public object Cart { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
