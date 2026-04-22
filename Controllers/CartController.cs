@@ -191,10 +191,13 @@ namespace EcoLilly.Controllers
                 Address = address,
                 Phone = phone,
                 UserEmail = userEmail,
-                TotalAmount = total, // Updated Total
+                TotalAmount = total,
                 OrderDate = DateTime.Now,
                 PaymentMethod = paymentMethod,
-                PaymentStatus = paymentMethod == "Online" ? "Paid" : "Pending"
+                PaymentStatus = paymentMethod == "Online" ? "Paid" : "Pending",
+
+                // ✅ ADD THIS LINE
+                TransactionId = Guid.NewGuid().ToString()
             };
 
             _context.Orders.Add(order);

@@ -16,52 +16,56 @@ namespace EcoLilly.Controllers
             _db = db;
         }
 
-        // GET: /Review/Create
+        // ✅ GET: Review/Create
         [HttpGet]
         public IActionResult Create(int productId)
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
+
             if (string.IsNullOrEmpty(userEmail))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var reviewModel = new Review
+            var review = new Review
             {
                 ProductId = productId,
-                User = userEmail,
-                Date = DateTime.Now
+                User = userEmail
             };
 
-            return View(reviewModel);
+            return View(review);
         }
 
-        // POST: /Review/Create
+        // ✅ POST: Review/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Review model)
         {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            model.User = userEmail;
             model.Date = DateTime.Now;
 
-            var userEmail = HttpContext.Session.GetString("UserEmail");
-            if (!string.IsNullOrEmpty(userEmail))
-            {
-                model.User = userEmail;
-            }
-
-            // Remove ModelState validation for navigational properties that might trip it up
+            // ❗ Fix validation issue
             ModelState.Remove("Product");
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _db.Reviews.Add(model);
-                await _db.SaveChangesAsync(); // Make sure you ran migrations!
-
-                TempData["SuccessMessage"] = "Thank you for your review!";
-                return RedirectToAction("MyOrders", "Account");
+                return View(model);
             }
 
-            return View(model);
+            _db.Reviews.Add(model);
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Review submitted successfully!";
+
+            // ✅ Redirect to Orders page
+            return RedirectToAction("Index", "Order");
         }
     }
 }

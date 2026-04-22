@@ -5,70 +5,99 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="container mt-4">
+<div class="max-w-6xl mx-auto px-4 py-8">
 
-    <h2 class="text-2xl font-bold mb-6">
+    <h2 class="text-3xl font-bold mb-8 text-gray-800">
         My Orders
     </h2>
 
     @if (!Model.Any())
     {
-        <div class="bg-white p-6 rounded shadow text-center">
-
-            <h3 class="text-lg font-semibold mb-2">
-                No Orders Yet
-            </h3>
-
-            <p class="text-gray-500 mb-4">
-                You have not placed any orders yet.
-            </p>
+        <div class="bg-white p-8 rounded-xl shadow text-center">
+            <h3 class="text-xl font-semibold mb-2">No Orders Yet</h3>
+            <p class="text-gray-500 mb-4">You have not placed any orders yet.</p>
 
             <a asp-controller="Shop"
                asp-action="Index"
-               class="bg-green-600 text-white px-4 py-2 rounded">
+               class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition">
                 Start Shopping
             </a>
-
         </div>
     }
     else
     {
         foreach (var order in Model)
         {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <strong>Order #@order.Id</strong> - @order.OrderDate.ToString("MMM dd, yyyy") | Total: $@order.TotalAmount
+            <div class="bg-white shadow-lg rounded-xl mb-6 p-6">
+
+                <!-- Order Header -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b pb-3">
+                    <div>
+                        <p class="font-semibold text-gray-800">
+                            Order #@order.Id
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            @order.OrderDate.ToString("MMM dd, yyyy")
+                        </p>
+                    </div>
+
+                    <div class="text-green-600 font-bold text-lg mt-2 md:mt-0">
+                        ₹@order.TotalAmount.ToString("N2")
+                    </div>
                 </div>
-                <div class="card-body">
-                    <ul>
-                        @foreach (var item in order.OrderItems)
-                        {
-                            <li>
-                                @item.Product.Name - Quantity: @item.Quantity
+
+                <!-- Order Items -->
+                <div class="space-y-4">
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-gray-50 p-4 rounded-lg">
+
+                            <!-- Product Info -->
+                            <div>
+                                <p class="font-semibold text-gray-800">
+                                    @item.Product.Name
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    Qty: @item.Quantity
+                                </p>
+                            </div>
+
+                            <!-- Price + Review -->
+                            <div class="flex flex-col md:flex-row md:items-center gap-3 mt-3 md:mt-0">
+
+                                <!-- Price -->
+                                <span class="font-bold text-green-600 text-lg">
+                                    ₹@((item.Price * item.Quantity).ToString("N2"))
+                                </span>
 
                                 @{
-                                    // Check if this specific user has reviewed this product
-                                    var userReview = item.Product.Reviews?.FirstOrDefault(r => r.User == order.UserEmail);
+                                    var userReview = item.Product.Reviews?
+                                        .FirstOrDefault(r => r.User == order.UserEmail);
                                 }
 
                                 @if (userReview != null)
                                 {
-                                    <div class="alert alert-info mt-2 p-2">
-                                        <strong>Your Review (@userReview.Rating/5):</strong> @userReview.Comment
-                                        <br /><small class="text-muted">Reviewed on: @userReview.Date.ToString("MMM dd, yyyy")</small>
+                                    <!-- Show Review -->
+                                    <div class="bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm">
+                                        ⭐ @userReview.Rating / 5
+                                        <br />
+                                        <span>@userReview.Comment</span>
                                     </div>
                                 }
                                 else
                                 {
-                                    // Show a button linking to a page where they can create the review
-                                    <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })" class="btn btn-sm btn-outline-primary mt-2">
-                                        Write a Review
+                                    <!-- Review Button -->
+                                    <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })"
+                                       class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                                        Write Review
                                     </a>
                                 }
-                            </li>
-                        }
-                    </ul>
+                            </div>
+
+                        </div>
+                    }
                 </div>
+
             </div>
         }
     }

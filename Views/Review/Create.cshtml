@@ -1,4 +1,4 @@
-@model EcoLilly.Models.Review
+﻿@model EcoLilly.Models.Review
 
 @{
     ViewData["Title"] = "Write a Review";
@@ -9,37 +9,83 @@
         <h2 class="text-2xl font-bold mb-6 text-gray-800">Write a Review</h2>
 
         <form asp-action="Create" method="post">
+            
+            <!-- Hidden fields -->
             <input type="hidden" asp-for="ProductId" />
             <input type="hidden" asp-for="User" />
 
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Rating (1 to 5)</label>
-                <select asp-for="Rating" class="w-full border rounded px-3 py-2 outline-none focus:ring-2 focus:ring-green-500">
-                    <option value="5">5 - Excellent</option>
-                    <option value="4">4 - Good</option>
-                    <option value="3">3 - Average</option>
-                    <option value="2">2 - Poor</option>
-                    <option value="1">1 - Terrible</option>
-                </select>
-            </div>
+            <!-- ⭐ STAR RATING -->
+           <div class="mb-5">
+    <label class="block text-gray-700 font-semibold mb-2">Rating</label>
 
+    <div class="star-rating">
+        <input type="radio" id="star5" name="Rating" value="5"><label for="star5">★</label>
+        <input type="radio" id="star4" name="Rating" value="4"><label for="star4">★</label>
+        <input type="radio" id="star3" name="Rating" value="3"><label for="star3">★</label>
+        <input type="radio" id="star2" name="Rating" value="2"><label for="star2">★</label>
+        <input type="radio" id="star1" name="Rating" value="1"><label for="star1">★</label>
+    </div>
+</div>
+
+            <!-- COMMENT -->
             <div class="mb-6">
                 <label class="block text-gray-700 font-semibold mb-2">Your Review</label>
-                <textarea asp-for="Comment" rows="4" required class="w-full border rounded px-3 py-2 outline-none focus:ring-2 focus:ring-green-500" placeholder="Tell us what you thought about this product..."></textarea>
+
+                <textarea asp-for="Comment"
+                          rows="4"
+                          required
+                          class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500"
+                          placeholder="Tell us what you thought..."></textarea>
+
                 <span asp-validation-for="Comment" class="text-red-500 text-sm"></span>
             </div>
 
+            <!-- BUTTONS -->
             <div class="flex gap-4">
-                <button type="submit" class="bg-green-600 text-white font-bold py-2 px-6 rounded hover:bg-green-700">
+                <button type="submit"
+                        class="bg-green-600 text-white font-bold py-2 px-6 rounded hover:bg-green-700">
                     Submit Review
                 </button>
-                <a href="@Url.Action("MyOrders", "Account")" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded hover:bg-gray-300">
+
+                <a asp-controller="Order"
+                   asp-action="Index"
+                   class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded hover:bg-gray-300">
                     Cancel
                 </a>
             </div>
+
         </form>
     </div>
 </div>
+
+@* @section Styles {
+<style>
+.star-rating {
+    direction: rtl;
+    display: inline-flex;
+    font-size: 32px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    color: #ccc;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.star-rating input:checked ~ label {
+    color: gold;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: gold;
+}
+</style>
+} *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

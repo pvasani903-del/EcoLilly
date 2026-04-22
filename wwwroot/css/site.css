@@ -264,3 +264,38 @@ body {
         align-items: flex-start;
     }
 }
+
+/* ? STAR RATING */
+
+.star-rating {
+    direction: rtl;
+    display: inline-flex;
+}
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        font-size: 35px;
+        color: #ccc;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        /* star icon */
+        .star-rating label::before {
+            content: "?";
+        }
+
+        /* hover */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+            transform: scale(1.2);
+        }
+
+    /* selected */
+    .star-rating input:checked ~ label {
+        color: gold;
+    }
