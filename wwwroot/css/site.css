@@ -265,11 +265,12 @@ body {
     }
 }
 
-/* ? STAR RATING */
+/* ? STAR RATING (WORKING) */
 
 .star-rating {
     direction: rtl;
     display: inline-flex;
+    justify-content: flex-start;
 }
 
     .star-rating input {
@@ -280,7 +281,7 @@ body {
         font-size: 35px;
         color: #ccc;
         cursor: pointer;
-        transition: 0.2s;
+        transition: 0.3s;
     }
 
         /* star icon */
@@ -288,14 +289,14 @@ body {
             content: "?";
         }
 
-        /* hover */
+        /* hover effect */
         .star-rating label:hover,
         .star-rating label:hover ~ label {
             color: gold;
             transform: scale(1.2);
         }
 
-    /* selected */
+    /* selected stars */
     .star-rating input:checked ~ label {
         color: gold;
     }
