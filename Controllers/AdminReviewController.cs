@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace EcoLilly.Controllers
 {
-    public class AdminWishlistController : Controller
+    public class AdminReviewController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public AdminWishlistController(ApplicationDbContext context)
+        public AdminReviewController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -20,20 +20,21 @@ namespace EcoLilly.Controllers
             if (HttpContext.Session.GetString("Role") != "Admin")
                 return RedirectToAction("Login", "Account");
 
-            var wishlists = _context.Wishlists
-                .Include(w => w.Product)
+            var reviews = _context.Reviews
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.Date)
                 .ToList();
 
-            return View(wishlists);
+            return View(reviews);
         }
 
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var wishlist = _context.Wishlists.Find(id);
-            if (wishlist != null)
+            var review = _context.Reviews.Find(id);
+            if (review != null)
             {
-                _context.Wishlists.Remove(wishlist);
+                _context.Reviews.Remove(review);
                 _context.SaveChanges();
             }
             return RedirectToAction("Index");

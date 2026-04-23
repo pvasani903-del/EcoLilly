@@ -1,5 +1,7 @@
 ﻿using EcoLilly.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace EcoLilly.Controllers
@@ -13,28 +15,27 @@ namespace EcoLilly.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string search)
+        public IActionResult Index()
         {
-            var orders = _context.Orders.AsQueryable();
+            if (HttpContext.Session.GetString("Role") != "Admin")
+                return RedirectToAction("Login", "Account");
 
-            if (!string.IsNullOrEmpty(search))
-            {
-                orders = orders.Where(o => o.Id.ToString().Contains(search));
-            }
+            var orders = _context.Orders
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
 
-            return View(orders.ToList());
+            return View(orders);
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var order = _context.Orders.Find(id);
-
             if (order != null)
             {
                 _context.Orders.Remove(order);
                 _context.SaveChanges();
             }
-
             return RedirectToAction("Index");
         }
     }

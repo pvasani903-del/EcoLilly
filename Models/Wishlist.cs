@@ -2,15 +2,18 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Wishlist
+namespace EcoLilly.Models // Added the missing namespace!
 {
-    [Key]
-    public int Id { get; set; }
+    public class Wishlist
+    {
+        [Key]
+        public int Id { get; set; }
 
-    public int ProductId { get; set; }
+        public int ProductId { get; set; }
 
-    public string UserEmail { get; set; }   // THIS COLUMN MUST EXIST IN DB
+        public string UserEmail { get; set; }
 
-    [ForeignKey("ProductId")]
-    public Product Product { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+    }
 }
