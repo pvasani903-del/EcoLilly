@@ -8,59 +8,21 @@
 <!-- Top Header Section -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-1"><i class="bi bi-cart-check text-primary me-2"></i> Edit Cart</h4>
-        <div class="text-muted small">Managing the active shopping cart for <span class="fw-bold text-dark">@userEmail</span></div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-cart-check text-primary me-2"></i> View Cart</h4>
+        <div class="text-muted small">Viewing the active shopping cart for <span class="fw-bold text-dark">@userEmail</span></div>
     </div>
     
     <div>
         <a class="btn btn-light border px-4 shadow-sm fw-bold text-secondary me-2" asp-controller="AdminCart" asp-action="Index">
             <i class="bi bi-arrow-left"></i> Back
         </a>
-        <form asp-controller="AdminCart" asp-action="Clear" method="post" class="d-inline">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="userEmail" value="@userEmail" />
-            <button type="submit" class="btn btn-danger px-4 shadow-sm fw-bold" onclick="return confirm('Clear entire cart for @userEmail ?');">
-                <i class="bi bi-trash"></i> Clear All
-            </button>
-        </form>
-    </div>
+        </div>
 </div>
 
 @if (TempData["success"] != null)
 {
     <div class="alert alert-success py-2 shadow-sm rounded-3">@TempData["success"]</div>
 }
-
-<!-- Add Item Section -->
-<div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
-    <div class="card-body p-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle text-success me-1"></i> Add Product to Cart</h6>
-        <form asp-controller="AdminCart" asp-action="AddItem" method="post" class="row g-3 align-items-end">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="userEmail" value="@userEmail" />
-            
-            <div class="col-md-7">
-                <label class="form-label small fw-bold text-secondary">Select Product</label>
-                <select name="productId" class="form-select border-0 shadow-sm" required>
-                    <option value="">-- Choose a product --</option>
-                    @foreach (var p in products)
-                    {
-                        <option value="@p.Id">@p.Name (₹@string.Format("{0:N2}", p.Price))</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label small fw-bold text-secondary">Quantity</label>
-                <input type="number" name="quantity" value="1" min="1" class="form-control border-0 shadow-sm" required />
-            </div>
-
-            <div class="col-md-2">
-                <button class="btn btn-success w-100 fw-bold shadow-sm">Add Item</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- Cart Items List -->
 <div class="card shadow-sm border-0 rounded-4">
@@ -80,9 +42,8 @@
                     <tr>
                         <th>Product Info</th>
                         <th class="text-end">Price</th>
-                        <th class="text-center">Manage Qty</th>
+                        <th class="text-center">Quantity</th>
                         <th class="text-end">Total Price</th>
-                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,38 +67,12 @@
                             <td class="text-end text-muted">₹@((item.Product?.Price ?? 0m).ToString("N2"))</td>
                             
                             <!-- Quantity Controls -->
-                            <td>
-                                <div class="d-flex justify-content-center align-items-center bg-light rounded-pill px-2 py-1 mx-auto" style="width: fit-content;">
-                                    <form asp-controller="AdminCart" asp-action="DecreaseItem" method="post" class="m-0">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button class="btn btn-sm btn-link text-dark text-decoration-none fw-bold fs-5 px-2 py-0 border-0">-</button>
-                                    </form>
-
-                                    <form asp-controller="AdminCart" asp-action="UpdateQuantity" method="post" class="m-0 d-flex align-items-center">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm text-center bg-transparent border-0 fw-bold" style="width:50px; font-size:15px;" onchange="this.form.submit()" />
-                                    </form>
-
-                                    <form asp-controller="AdminCart" asp-action="IncreaseItem" method="post" class="m-0">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button class="btn btn-sm btn-link text-dark text-decoration-none fw-bold fs-5 px-2 py-0 border-0">+</button>
-                                    </form>
-                                </div>
+                            <td class="text-center fw-bold">
+                                @item.Quantity
                             </td>
 
                             <td class="text-end fw-bold text-success">
                                 ₹@(((item.Product?.Price ?? 0m) * item.Quantity).ToString("N2"))
-                            </td>
-                            
-                            <td class="text-end">
-                                <form asp-controller="AdminCart" asp-action="Delete" method="post" class="m-0" onsubmit="return confirm('Remove item from cart?');">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@item.Id" />
-                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Remove</button>
-                                </form>
                             </td>
                         </tr>
                     }

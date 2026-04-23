@@ -47,9 +47,9 @@
                             <td class="fw-bold">@u.UserEmail</td>
                             <td><span class="badge bg-secondary">@u.ItemsCount Items</span></td>
                             <td class="text-end">
-                                <!-- EDIT BUTTON (Details Action internally) -->
-                                <a class="btn btn-sm btn-outline-primary me-2" asp-controller="AdminCart" asp-action="Details" asp-route-userEmail="@u.UserEmail">
-                                    <i class="bi bi-pencil-square"></i> Edit
+                                <!-- VIEW BUTTON (Details Action internally) -->
+                                <a class="btn btn-sm btn-outline-info me-2" asp-controller="AdminCart" asp-action="Details" asp-route-userEmail="@u.UserEmail">
+                                    <i class="bi bi-eye"></i> View
                                 </a>
 
                                 <!-- DELETE BUTTON (Clear Action internally) -->
