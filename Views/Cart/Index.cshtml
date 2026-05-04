@@ -35,11 +35,15 @@
             {
                 if (item.Product != null)
                 {
+                    var imgSrc = string.IsNullOrEmpty(item.Product.Image)
+                        ? Url.Content("~/images/no-image.png")
+                        : (item.Product.Image.StartsWith("/") || item.Product.Image.StartsWith("http")
+                            ? item.Product.Image
+                            : Url.Content("~/images/products/" + item.Product.Image));
 
                     <div class="cart-item">
 
-                        <img src="@item.Product.Image" class="cart-img" />
-
+                        <img src="@imgSrc" class="cart-img" />
                         <div class="cart-details">
 
                             <h4>@item.Product.Name</h4>

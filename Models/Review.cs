@@ -1,5 +1,4 @@
-﻿using EcoLilly.Models;
-using System;
+﻿using System;
 
 namespace EcoLilly.Models
 {

@@ -3,240 +3,402 @@
 
 @{
     ViewData["Title"] = "Checkout";
+    var subtotal = Model.Sum(i => i.Product.Price * i.Quantity);
+    var discounts = ViewBag.Discounts as List<EcoLilly.Models.Discount> ?? new List<EcoLilly.Models.Discount>();
+    var sessionEmail = Context.Session.GetString("UserEmail") ?? "";
 }
 
 <link rel="stylesheet" href="~/css/checkout.css" />
 
-<div class="checkout-container">
+<section class="min-h-screen bg-gray-50 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <h2 class="checkout-title">Checkout</h2>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
 
-    <form asp-controller="Cart" asp-action="PlaceOrder" method="post" novalidate>
-
-        <div class="checkout-grid">
-
-            <!-- LEFT SIDE -->
-            <div class="checkout-left">
-
-                <h3>Customer Details</h3>
-
-                <input type="text" name="name" placeholder="Full Name" required />
-                <input type="text" name="phone" placeholder="Phone Number" required />
-                <textarea name="address" placeholder="Enter your address" required></textarea>
-
-                <!-- 🔥 MODERN PAYMENT UI -->
-                <h4 class="mt-4 mb-2 font-semibold text-lg">Payment Method</h4>
-
-                <div class="space-y-3">
-
-                    <!-- COD -->
-                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
-                        <div class="flex items-center gap-3">
-                            <input type="radio" name="paymentMethod" value="COD" checked onclick="showPaymentFields()" />
-                            <span class="font-medium">Cash On Delivery</span>
-                        </div>
-                        <span class="text-green-600">Free</span>
-                    </label>
-
-                    <!-- UPI -->
-                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
-                        <div class="flex items-center gap-3">
-                            <input type="radio" name="paymentMethod" value="UPI" onclick="showPaymentFields()" />
-                            <span class="font-medium">UPI Payment</span>
-                        </div>
-                        <span>📱</span>
-                    </label>
-
-                    <!-- UPI BOX -->
-                    <div id="upiSection" class="hidden border rounded-lg p-3 bg-gray-50">
-                        <input type="text" name="upiId" placeholder="Enter UPI ID (example@upi)"
-                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- LEFT: Shipping & Payment (8/12) -->
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-xl shadow p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center font-bold">1</div>
+                        <h2 class="text-lg font-semibold">Shipping Address</h2>
                     </div>
 
-                    <!-- CARD -->
-                    <label class="flex items-center justify-between border rounded-lg p-3 cursor-pointer hover:shadow">
-                        <div class="flex items-center gap-3">
-                            <input type="radio" name="paymentMethod" value="CARD" onclick="showPaymentFields()" />
-                            <span class="font-medium">Debit / Credit Card</span>
+                    <form asp-controller="Cart" asp-action="PlaceOrder" method="post" id="checkoutForm" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" id="customerEmail" name="customerEmail" value="@sessionEmail" />
+
+                        <div id="formAlert" class="hidden mb-4 text-red-600"></div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <input type="text" name="name" id="name" placeholder="Full name" class="border rounded px-3 py-2 w-full" required aria-required="true" />
+                                <div class="text-sm text-red-600 mt-1 hidden" id="err-name" role="alert">Please enter your full name.</div>
+                            </div>
+
+                            <div>
+                                <input type="tel" name="phone" id="phone" placeholder="Phone number" class="border rounded px-3 py-2 w-full" required aria-required="true" pattern="^[0-9\-\+\s]{7,15}$" />
+                                <div class="text-sm text-red-600 mt-1 hidden" id="err-phone" role="alert">Please enter a valid phone (7–15 digits).</div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <textarea name="address" id="address" placeholder="Address (street, area)" class="border rounded px-3 py-2 w-full" rows="3" required aria-required="true"></textarea>
+                                <div class="text-sm text-red-600 mt-1 hidden" id="err-address" role="alert">Please enter your address.</div>
+                            </div>
+
+                            <div>
+                                <input type="text" name="city" id="city" placeholder="City" class="border rounded px-3 py-2 w-full" />
+                            </div>
+                            <div>
+                                <input type="text" name="state" id="state" placeholder="State" class="border rounded px-3 py-2 w-full" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="text" name="postalCode" id="postalCode" placeholder="Postal / ZIP code" class="border rounded px-3 py-2 w-full" />
+                            </div>
                         </div>
-                        <span>💳</span>
-                    </label>
 
-                    <!-- CARD BOX -->
-                    <div id="cardSection" class="hidden border rounded-lg p-3 bg-gray-50 space-y-2">
+                        <div class="mt-6 border rounded-lg bg-gray-50 p-4">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Method</h3>
 
-                        <input type="text" name="cardName" placeholder="Card Holder Name"
-                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="flex items-start gap-3 p-3 rounded border hover:shadow-sm cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="COD" id="payCod" checked class="mt-1" />
+                                    <div>
+                                        <div class="font-semibold">Cash on Delivery</div>
+                                        <div class="text-sm text-gray-500">Pay when your order arrives.</div>
+                                    </div>
+                                </label>
 
-                        <input type="text" name="cardNumber" placeholder="Card Number" maxlength="16"
-                               class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                                <label class="flex items-start gap-3 p-3 rounded border hover:shadow-sm cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="Online" id="payOnline" class="mt-1" />
+                                    <div>
+                                        <div class="font-semibold">Online Payment</div>
+                                        <div class="text-sm text-gray-500">Pay securely with Cashfree (card / UPI / netbanking).</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <p class="text-xs text-gray-500 mt-3">You will be redirected to Cashfree to complete online payment.</p>
+                        </div>
+
+                        <div class="mt-6">
+                            <button id="placeOrderBtn" type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg" aria-disabled="false">
+                                Place Order
+                            </button>
+
+                            <p id="checkoutError" class="text-red-600 text-sm mt-2 hidden" role="alert"></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: Order Summary (4/12) -->
+            <aside class="lg:col-span-4">
+                <div class="bg-white rounded-xl shadow p-6 sticky top-20">
+                    <h3 class="font-semibold text-lg mb-3">Order Summary</h3>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Have a coupon?</label>
 
                         <div class="flex gap-2">
-                            <input type="text" name="expiry" placeholder="MM/YY" maxlength="5"
-                                   class="w-1/2 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
-
-                            <input type="text" name="cvv" placeholder="CVV" maxlength="3"
-                                   class="w-1/2 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                            <select id="discountSelect" class="border rounded px-3 py-2 w-full">
+                                <option value="">Select active offer</option>
+                                @foreach (var d in discounts)
+                                {
+                                    <option value="@d.Code" data-percentage="@d.Percentage">@d.Code (@d.Percentage%)</option>
+                                }
+                            </select>
+                            <button type="button" id="applyDiscountBtn" class="bg-green-600 text-white rounded px-4 py-2">Apply</button>
                         </div>
 
+                        <input id="couponText" type="text" placeholder="Enter coupon code" class="mt-2 border rounded px-3 py-2 w-full" />
+                        <p id="couponMsg" class="text-sm mt-2 text-gray-500"></p>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <div class="py-3">
+                            @foreach (var item in Model)
+                            {
+                                var imgSrc = string.IsNullOrEmpty(item.Product?.Image)
+                                    ? Url.Content("~/images/no-image.png")
+                                    : (item.Product.Image.StartsWith("/") || item.Product.Image.StartsWith("http")
+                                        ? item.Product.Image
+                                        : Url.Content("~/images/products/" + item.Product.Image));
+                                <div class="flex items-start gap-3 py-2">
+                                    <img src="@imgSrc" class="w-14 h-14 object-cover rounded" />
+                                    <div class="flex-1">
+                                        <div class="text-sm font-semibold">@item.Product.Name</div>
+                                        <div class="text-xs text-gray-500">Qty: @item.Quantity</div>
+                                    </div>
+                                    <div class="text-sm font-semibold text-green-600">₹@((item.Product.Price * item.Quantity).ToString("0.00"))</div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="py-3">
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <div>Subtotal</div>
+                                <div>₹<span id="summarySubtotal">@subtotal.ToString("0.00")</span></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600 mt-2">
+                                <div>Shipping</div>
+                                <div class="text-green-600">FREE</div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600 mt-2">
+                                <div>Tax</div>
+                                <div>₹<span id="summaryTax">0.00</span></div>
+                            </div>
+
+                            <div class="flex justify-between text-sm text-gray-600 mt-2">
+                                <div>Discount</div>
+                                <div>- ₹<span id="summaryDiscount">0.00</span></div>
+                            </div>
+
+                            <div class="flex justify-between items-center mt-4 pt-4 border-t">
+                                <div class="text-lg font-bold">Total</div>
+                                <div class="text-xl font-bold text-green-600">₹<span id="summaryTotal">@subtotal.ToString("0.00")</span></div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
+            </aside>
+        </div>
+    </div>
+</section>
 
-            </div>
+<script>
+    // Basic client-side validation helpers
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = msg || el.getAttribute('data-default') || el.textContent;
+        el.classList.remove('hidden');
+    }
+    function hideError(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('hidden');
+    }
 
-            <!-- RIGHT SIDE -->
-            <div class="checkout-right">
+    // Validate single field, returns true if valid
+    function validateField(field) {
+        if (!field) return true;
+        const name = field.getAttribute('name');
+        const val = field.value?.trim() ?? '';
+        if (field.hasAttribute('required') && !val) {
+            showError('err-' + name, 'This field is required.');
+            return false;
+        }
 
-                <h3>Order Summary</h3>
+        if (name === 'phone' && val) {
+            const digits = val.replace(/\D/g, '');
+            if (digits.length < 7 || digits.length > 15) {
+                showError('err-phone', 'Enter a valid phone number (7–15 digits).');
+                return false;
+            }
+        }
 
-                <table class="checkout-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
+        hideError('err-' + name);
+        return true;
+    }
 
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.Product.Name</td>
-                                <td>₹@item.Product.Price</td>
-                                <td>@item.Quantity</td>
-                                <td>₹@(item.Product.Price * item.Quantity)</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    (function () {
+        const checkoutForm = document.getElementById('checkoutForm');
+        const placeBtn = document.getElementById('placeOrderBtn');
+        const inputs = ['name','phone','address'];
 
-                <!-- COUPON -->
-                <div class="coupon-box">
+        inputs.forEach(function(n) {
+            const el = document.getElementById(n);
+            if (!el) return;
+            el.addEventListener('input', function () { validateField(el); });
+            el.addEventListener('blur', function () { validateField(el); });
+        });
 
-                    <select id="couponDropdown">
-                        <option value="">Select Offer</option>
-                        <option value="SAVE10">SAVE10 - 10% OFF</option>
-                        <option value="SAVE20">SAVE20 - 20% OFF</option>
-                        <option value="FEST50">FEST50 - 50% OFF</option>
-                    </select>
+        // coupon preview and totals (unchanged)
+        const subtotal = parseFloat(document.getElementById('summarySubtotal')?.textContent || '0');
+        const discountSelect = document.getElementById('discountSelect');
+        const couponText = document.getElementById('couponText');
+        const applyBtn = document.getElementById('applyDiscountBtn');
+        const couponMsg = document.getElementById('couponMsg');
+        const summaryDiscountEl = document.getElementById('summaryDiscount');
+        const summaryTotalEl = document.getElementById('summaryTotal');
 
-                    <input type="text" id="couponCode" name="couponCode" placeholder="Enter Coupon Code" />
+        function updateTotals(discountAmount) {
+            summaryDiscountEl.textContent = (discountAmount || 0).toFixed(2);
+            const finalTotal = Math.max(0, subtotal - (discountAmount || 0));
+            summaryTotalEl.textContent = finalTotal.toFixed(2);
+        }
 
-                    <button type="button" onclick="applyCoupon()" class="apply-btn">
-                        Apply
-                    </button>
+        function previewCoupon(code) {
+            if (!code) {
+                couponMsg.textContent = '';
+                updateTotals(0);
+                removeHiddenCoupon();
+                return;
+            }
 
-                </div>
+            const opt = Array.from(discountSelect.options).find(o => o.value && o.value.toLowerCase() === code.toLowerCase());
+            if (opt) {
+                const perc = parseFloat(opt.dataset.percentage || '0') || 0;
+                const discountAmt = +(subtotal * perc / 100).toFixed(2);
+                couponMsg.textContent = `Applied ${perc}% coupon — you save ₹${discountAmt.toFixed(2)}.`;
+                couponMsg.classList.remove('text-red-600');
+                couponMsg.classList.add('text-green-600');
+                updateTotals(discountAmt);
+                ensureHiddenCoupon(code);
+            } else {
+                couponMsg.textContent = 'Coupon entered will be validated at checkout.';
+                couponMsg.classList.remove('text-green-600');
+                couponMsg.classList.add('text-gray-500');
+                updateTotals(0);
+                ensureHiddenCoupon(code);
+            }
+        }
 
-                @{
-                    var total = Model.Sum(i => i.Product.Price * i.Quantity);
+        function ensureHiddenCoupon(code) {
+            let existing = document.querySelector('input[name="couponCode"]');
+            if (!existing) {
+                existing = document.createElement('input');
+                existing.type = 'hidden';
+                existing.name = 'couponCode';
+                checkoutForm.appendChild(existing);
+            }
+            existing.value = code;
+        }
+
+        function removeHiddenCoupon() {
+            const existing = document.querySelector('input[name="couponCode"]');
+            if (existing) existing.remove();
+        }
+
+        discountSelect?.addEventListener('change', function () {
+            const opt = this.selectedOptions[0];
+            couponText.value = opt && opt.value ? opt.value : '';
+            previewCoupon(couponText.value.trim());
+        });
+        applyBtn?.addEventListener('click', function () {
+            const code = couponText.value.trim();
+            if (!code) { alert('Enter coupon code or select one.'); return; }
+            previewCoupon(code);
+        });
+        couponText?.addEventListener('blur', function () {
+            previewCoupon(this.value.trim());
+        });
+        updateTotals(0);
+
+        // Intercept submit to handle Online flow via AJAX and include customer fields
+        checkoutForm?.addEventListener('submit', async function (e) {
+            // basic validation
+            let valid = true;
+            ['name','phone','address'].forEach(function(n) {
+                const f = document.getElementById(n);
+                if (!validateField(f)) valid = false;
+            });
+            if (!valid) {
+                e.preventDefault();
+                const formAlertEl = document.getElementById('formAlert');
+                if (formAlertEl) { formAlertEl.textContent = 'Please fix errors before placing the order.'; formAlertEl.classList.remove('hidden'); }
+                return false;
+            }
+
+            const method = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
+            if (method !== 'Online') {
+                // allow normal submit for COD
+                return true;
+            }
+
+            e.preventDefault();
+
+            const fd = new FormData();
+            const tokenInput = checkoutForm.querySelector('input[name="__RequestVerificationToken"]');
+            if (tokenInput) fd.append('__RequestVerificationToken', tokenInput.value);
+            fd.append('name', document.getElementById('name').value.trim());
+            fd.append('phone', document.getElementById('phone').value.trim());
+            fd.append('address', document.getElementById('address').value.trim());
+            fd.append('paymentMethod', method);
+            const coupon = document.querySelector('input[name="couponCode"]');
+            if (coupon && coupon.value) fd.append('couponCode', coupon.value);
+
+            // include customer email (from session hidden input)
+            const customerEmail = document.getElementById('customerEmail')?.value || '';
+            if (customerEmail) fd.append('customerEmail', customerEmail);
+
+            try {
+                const resp = await fetch('@Url.Action("PlaceOrder","Cart")', {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const json = await resp.json();
+                if (!json || !json.success) {
+                    var err = document.getElementById('checkoutError');
+                    if (err) { err.textContent = (json && json.message) ? json.message : 'Unable to start online payment.'; err.classList.remove('hidden'); }
+                    return;
                 }
 
-                <!-- BILL -->
-                <div class="bill-row">
-                    <span>Subtotal</span>
-                    <span>₹<span id="subtotal">@total</span></span>
-                </div>
+                // Build and submit form to Cashfree in a new window
+                const checkoutUrl = json.checkoutUrl;
+                const token = json.token;
+                const orderId = json.orderId;
+                const orderAmount = json.orderAmount;
+                const returnUrl = json.returnUrl;
+                const appId = json.appId ?? '';
+                const customerName = json.customerName ?? '';
+                const customerPhone = json.customerPhone ?? '';
+                const customerEmailResp = json.customerEmail ?? customerEmail;
 
-                <div class="bill-row">
-                    <span>Discount</span>
-                    <span>- ₹<span id="discount">0</span></span>
-                </div>
+                if (!checkoutUrl || !token) {
+                    var err2 = document.getElementById('checkoutError');
+                    if (err2) { err2.textContent = 'Payment initiation failed (no token).'; err2.classList.remove('hidden'); }
+                    return;
+                }
 
-                <div class="bill-row total-row">
-                    <span>Total Payment</span>
-                    <span>₹<span id="finalTotal">@total</span></span>
-                </div>
+                const win = window.open('', 'cashfree_pay_' + Date.now(), 'width=900,height=700');
+                if (!win) {
+                    var err3 = document.getElementById('checkoutError');
+                    if (err3) { err3.textContent = 'Popup blocked. Allow popups or try again.'; err3.classList.remove('hidden'); }
+                    return;
+                }
 
-                <button type="submit" class="place-btn">
-                    Place Order
-                </button>
+                const payForm = document.createElement('form');
+                payForm.method = 'POST';
+                payForm.action = checkoutUrl;
+                payForm.target = win.name;
+                payForm.style.display = 'none';
 
-            </div>
+                const fields = {
+                    tokenData: token,
+                    orderId: orderId,
+                    orderAmount: orderAmount,
+                    returnUrl: returnUrl,
+                    orderCurrency: 'INR'
+                };
+                if (appId) fields.appId = appId;
+                if (customerName) fields.customerName = customerName;
+                if (customerPhone) fields.customerPhone = customerPhone;
+                if (customerEmailResp) fields.customerEmail = customerEmailResp;
 
-        </div>
+                for (const k in fields) {
+                    const inp = document.createElement('input');
+                    inp.type = 'hidden';
+                    inp.name = k;
+                    inp.value = fields[k] ?? '';
+                    payForm.appendChild(inp);
+                }
 
-    </form>
+                document.body.appendChild(payForm);
+                payForm.submit();
+                setTimeout(() => payForm.remove(), 3000);
 
-</div>
+            } catch (ex) {
+                console.error(ex);
+                var err4 = document.getElementById('checkoutError');
+                if (err4) { err4.textContent = 'Payment initiation error. Try again.'; err4.classList.remove('hidden'); }
+            }
+        });
 
-<!-- 🔥 SCRIPTS -->
-<script>
-
-// SHOW PAYMENT UI
-function showPaymentFields() {
-
-    var method = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-    document.getElementById("upiSection").classList.add("hidden");
-    document.getElementById("cardSection").classList.add("hidden");
-
-    if (method === "UPI") {
-        document.getElementById("upiSection").classList.remove("hidden");
-    }
-
-    if (method === "CARD") {
-        document.getElementById("cardSection").classList.remove("hidden");
-    }
-}
-
-// LOAD
-document.addEventListener("DOMContentLoaded", function () {
-
-    showPaymentFields();
-
-    document.getElementById("couponDropdown").addEventListener("change", function () {
-        var selected = this.value;
-        document.getElementById("couponCode").value = selected;
-
-        if (selected !== "") {
-            applyCoupon();
-        }
-    });
-
-});
-
-// COUPON
-function applyCoupon() {
-
-    var code =
-        document.getElementById("couponCode").value ||
-        document.getElementById("couponDropdown").value;
-
-    var subtotal =
-        parseFloat(document.getElementById("subtotal").innerText);
-
-    if (code === "") {
-        alert("Please select or enter coupon");
-        return;
-    }
-
-    fetch('/Order/ApplyCoupon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code, subtotal: subtotal })
-    })
-    .then(response => response.json())
-    .then(data => {
-
-        if (data.success) {
-            document.getElementById("discount").innerText =
-                parseFloat(data.discountAmount).toFixed(2);
-
-            document.getElementById("finalTotal").innerText =
-                parseFloat(data.finalAmount).toFixed(2);
-        }
-        else {
-            document.getElementById("discount").innerText = "0";
-            document.getElementById("finalTotal").innerText =
-                subtotal.toFixed(2);
-        }
-
-    });
-
-}
-
+    })();
 </script>

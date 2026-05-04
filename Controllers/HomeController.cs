@@ -21,11 +21,8 @@ namespace EcoLilly.Controllers
         // =========================
         public IActionResult Index(string search)
         {
-            var role = HttpContext.Session.GetString("Role");
-
-            if (role != "User")
-                return RedirectToAction("Login", "Account");
-
+            // Allow anonymous users to view the home page.
+            // If a user is signed in we still read their email for view use.
             var email = HttpContext.Session.GetString("UserEmail");
             ViewBag.UserEmail = email;
 

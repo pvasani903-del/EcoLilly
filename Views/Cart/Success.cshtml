@@ -1,33 +1,52 @@
-﻿<link rel="stylesheet" href="~/css/success.css" />
+﻿@model EcoLilly.Models.Order
+
+<link rel="stylesheet" href="~/css/success.css" />
+
+@{
+    // determine status and image to show
+    var status = (Model?.PaymentStatus ?? "").ToLowerInvariant();
+    var isSuccess = status.Contains("success") || status.Contains("paid");
+    var imgSrc = Url.Content(isSuccess ? "~/images/success-check.png" : "~/images/pending.png");
+    var title = isSuccess ? "Order Successful" : "Order Received";
+}
 
 <div class="success-container">
 
-    <div class="success-icon">
-        ✅
-    </div>
+    @* <div class="success-icon">
+        <img src="@imgSrc" alt="@title" />
+    </div> *@
 
-    <h2 class="success-title">Order Successful</h2>
+    <h2 class="success-title">@title</h2>
 
     <p class="success-msg">
         Thank you for your purchase. Your order has been placed successfully.
     </p>
 
     <div class="bill-card">
-
         <h3>Order Summary</h3>
 
         <div class="bill-row">
             <span>Order Date</span>
-            <span>@DateTime.Now.ToShortDateString()</span>
+            <span>@(Model != null ? Model.OrderDate.ToShortDateString() : DateTime.Now.ToShortDateString())</span>
         </div>
 
         <div class="bill-row">
             <span>Payment Status</span>
-            <span>Completed</span>
+            <span>@(Model != null ? Model.PaymentStatus : "Completed")</span>
         </div>
 
-        
+        @if (Model != null)
+        {
+            <div class="bill-row">
+                <span>Order ID</span>
+                <span>#@Model.Id</span>
+            </div>
 
+            <div class="bill-row">
+                <span>Total</span>
+                <span>₹@Model.FinalAmount.ToString("0.00")</span>
+            </div>
+        }
     </div>
 
     @if (TempData["Success"] != null)
@@ -35,12 +54,22 @@
         <p>@TempData["Success"]</p>
     }
 
-    <a asp-controller="Shop"
-       asp-action="Index"
-       class="btn-success">
+    <div style="margin-top:16px; display:flex; gap:12px;">
+        <a asp-controller="Shop"
+           asp-action="Index"
+           class="btn-success">
+            Continue Shopping
+        </a>
 
-        Continue Shopping
-
-    </a>
+        @if (Model != null)
+        {
+            <a asp-controller="Cart"
+               asp-action="DownloadInvoice"
+               asp-route-id="@Model.Id"
+               class="btn-success" style="background:#555;">
+                Download Invoice (PDF)
+            </a>
+        }
+    </div>
 
 </div>

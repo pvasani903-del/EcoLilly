@@ -5,10 +5,12 @@
         public int Id { get; set; }
 
         public int OrderId { get; set; }
-        public Order Order { get; set; } = null!;
+        public Order? Order { get; set; }   // ✅ safe
 
         public int ProductId { get; set; }
-        public Product Product { get; set; } = null!;
+
+        // ✅ FIX: allow null (VERY IMPORTANT)
+        public Product? Product { get; set; }
 
         public int Quantity { get; set; }
 

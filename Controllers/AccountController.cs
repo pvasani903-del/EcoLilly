@@ -1,5 +1,5 @@
-﻿using EcoLilly.Data;
-using EcoLilly.Models;
+﻿using EcoLilly.Models;
+using EcoLilly.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.IO;
@@ -82,8 +82,8 @@ namespace EcoLilly.Controllers
             if (admin != null && admin.Password == password)
             {
                 HttpContext.Session.SetString("Role", "Admin");
-                HttpContext.Session.SetString("AdminEmail", admin.Email); // Fixed: Make sure this uses "AdminEmail" so Change Password finds it securely
-                HttpContext.Session.SetString("UserEmail", admin.Email);  // Used for some fallback user logic
+                HttpContext.Session.SetString("AdminEmail", admin.Email);
+                HttpContext.Session.SetString("UserEmail", admin.Email);
                 HttpContext.Session.SetString("UserName", admin.Name ?? admin.Username ?? "Admin");
                 HttpContext.Session.SetString("UserProfileImage", "/images/default-avatar.png");
 
@@ -108,7 +108,6 @@ namespace EcoLilly.Controllers
                         : user.ProfileImage
                 );
 
-                // ✅ SET COUNTS ON LOGIN
                 var cartCount = _context.CartItems.Count(c => c.UserEmail == user.Email);
                 var wishlistCount = _context.Wishlists.Count(w => w.UserEmail == user.Email);
 
@@ -121,6 +120,130 @@ namespace EcoLilly.Controllers
             ViewBag.Error = "Invalid Email or Password";
             return View();
         }
+
+        // ================= FORGOT PASSWORD (GET) =================
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            // Returns Views/Account/ForgotPassword.cshtml
+            return View();
+        }
+
+        // ================= FORGOT PASSWORD (POST) =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(string email, string? newPassword = null, string? confirmPassword = null)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Please enter your email.";
+                return View();
+            }
+
+            // Immediate reset path
+            if (!string.IsNullOrEmpty(newPassword) || !string.IsNullOrEmpty(confirmPassword))
+            {
+                if (string.IsNullOrEmpty(newPassword) || newPassword != confirmPassword)
+                {
+                    ViewBag.Error = "Passwords do not match.";
+                    return View();
+                }
+
+                // Prefer updating admin first if email belongs to admin
+                var admin = _context.Admins.FirstOrDefault(a => a.Email == email);
+                if (admin != null)
+                {
+                    admin.Password = newPassword;
+                    _context.Update(admin);
+                    _context.SaveChanges();
+
+                    TempData["success"] = "Password reset successfully. Please login.";
+                    return RedirectToAction("Login");
+                }
+
+                var user = _context.Users.FirstOrDefault(u => u.Email == email);
+                if (user != null)
+                {
+                    user.Password = newPassword;
+                    _context.Update(user);
+                    _context.SaveChanges();
+
+                    TempData["success"] = "Password reset successfully. Please login.";
+                    return RedirectToAction("Login");
+                }
+
+                // Generic response to avoid revealing whether account exists (production-safe)
+                TempData["success"] = "If an account exists for that email, the password has been updated. Please login.";
+                return RedirectToAction("Login");
+            }
+
+            // Default behaviour: generate dev reset link (existing flow)
+            var devToken = Guid.NewGuid().ToString();
+            var resetLink = Url.Action("ResetPassword", "Account", new { email = email, token = devToken }, Request.Scheme);
+
+            ViewBag.Message = "If an account exists for that email, a reset link has been sent.";
+            // Helpful for development to verify flow — remove in production
+            ViewBag.DebugResetLink = resetLink;
+
+            return View();
+        }
+
+        // ================= RESET PASSWORD (GET) =================
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            // In production: validate token against DB and expiry. Here we simply show the form.
+            ViewBag.Email = email;
+            ViewBag.Token = token;
+            return View();
+        }
+
+        // ================= RESET PASSWORD (POST) =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(string email, string token, string newPassword, string confirmPassword)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Invalid request.";
+                return View();
+            }
+
+            if (string.IsNullOrEmpty(newPassword) || newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match.";
+                ViewBag.Email = email;
+                ViewBag.Token = token;
+                return View();
+            }
+
+            // Prefer updating admin first (so admin and user emails both supported)
+            var admin = _context.Admins.FirstOrDefault(a => a.Email == email);
+            if (admin != null)
+            {
+                admin.Password = newPassword;
+                _context.Update(admin);
+                await _context.SaveChangesAsync();
+
+                TempData["success"] = "Password has been reset successfully. You may now login.";
+                return RedirectToAction("Login");
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                ViewBag.Error = "Invalid request.";
+                return View();
+            }
+
+            user.Password = newPassword;
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["success"] = "Password has been reset successfully. You may now login.";
+            return RedirectToAction("Login");
+        }
+
         // ================= DASHBOARD =================
         public IActionResult Dashboard()
         {

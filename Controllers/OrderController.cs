@@ -20,7 +20,11 @@ namespace EcoLilly.Controllers
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
 
-            // Include OrderItems, Product, and Reviews to display them in the view
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var orders = _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)

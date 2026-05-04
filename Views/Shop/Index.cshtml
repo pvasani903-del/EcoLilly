@@ -116,8 +116,10 @@
 
                             <!-- PRODUCT IMAGE -->
                             <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id">
-                                <img src="@(string.IsNullOrEmpty(product.Image) ? "/images/placeholder.jpg" : product.Image)"
-                                     class="w-full h-48 object-cover rounded-lg mb-3" alt="@product.Name" />
+                                <img src="@(string.IsNullOrEmpty(product.Image) 
+                            ? Url.Content("~/images/placeholder.jpg") 
+                            : Url.Content("~/images/products/" + product.Image))"
+         class="w-full h-48 object-cover rounded-lg mb-3" alt="@product.Name" />
                             </a>
 
                             <div class="flex-grow">

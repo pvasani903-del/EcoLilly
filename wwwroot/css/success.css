@@ -6,7 +6,18 @@
 }
 
 .success-icon {
-    font-size: 80px;
+    margin-bottom: 10px;
+}
+
+.success-icon img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    padding: 8px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16,185,129,0.12);
+    border: 6px solid #10b981; /* green ring */
 }
 
 .success-title {

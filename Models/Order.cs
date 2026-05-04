@@ -20,14 +20,19 @@ namespace EcoLilly.Models
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
         public decimal TotalAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal FinalAmount { get; set; }
 
         public string PaymentMethod { get; set; } = "COD";
-
         public string PaymentStatus { get; set; } = "Pending";
 
         public string? TransactionId { get; set; }
 
         public string UserEmail { get; set; } = string.Empty;
+        public string? UserName { get; set; }
+
+        public int? OfferId { get; set; }
+        public Offer? Offer { get; set; }
 
         public List<OrderItem> OrderItems { get; set; } = new();
     }

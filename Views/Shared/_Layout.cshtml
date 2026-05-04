@@ -74,7 +74,7 @@
                         <!-- BUTTON -->
                         <button onclick="toggleDropdown(event)" class="flex items-center gap-2 focus:outline-none">
                             <img src="@userProfile" class="w-9 h-9 rounded-full border-2 border-green-500 object-cover" />
-                            <span class="hidden md:block font-medium">@userName</span>
+                            <span class="hidden md:block font-medium text-green-700">@userName</span>
                         </button>
 
                         <!-- DROPDOWN -->
@@ -85,8 +85,8 @@
                             <div class="p-3 border-b flex items-center gap-3 bg-gray-50">
                                 <img src="@userProfile" class="w-10 h-10 rounded-full object-cover" />
                                 <div>
-                                    <p class="font-semibold text-gray-800">@userName</p>
-                                    <p class="text-xs text-gray-500">@userEmail</p>
+                                    <p class="font-semibold text-green-700">@userName</p>
+                                    <p class="text-xs text-green-600">@userEmail</p>
                                 </div>
                             </div>
 
@@ -143,6 +143,23 @@
                 <a asp-controller="Shop" asp-action="Index">Shop</a>
                 <a asp-controller="Home" asp-action="About">About</a>
                 <a asp-controller="Home" asp-action="Contact">Contact</a>
+
+                @* Show auth links inside mobile menu for small screens *@
+                @if (string.IsNullOrEmpty(userEmail))
+                {
+                    <div class="border-t pt-3">
+                        <a asp-controller="Account" asp-action="Login" class="block px-3 py-2 text-gray-700">Sign In</a>
+                        <a asp-controller="Account" asp-action="Register" class="block px-3 py-2 mt-1 bg-green-600 text-white rounded text-center">Join Us</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="border-t pt-3">
+                        <a asp-controller="Account" asp-action="Dashboard" class="block px-3 py-2 text-gray-700">Dashboard</a>
+                        <a asp-controller="Account" asp-action="EditProfile" class="block px-3 py-2 text-gray-700">Edit Profile</a>
+                        <a asp-controller="Account" asp-action="ChangePassword" class="block px-3 py-2 text-gray-700">Change Password</a>
+                    </div>
+                }
             </div>
         </div>
     </header>

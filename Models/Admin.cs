@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcoLilly.Models
 {
@@ -7,15 +8,15 @@ namespace EcoLilly.Models
         public int Id { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         // Use Email for login
-        [Required, EmailAddress] 
-        public string Email { get; set; }
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

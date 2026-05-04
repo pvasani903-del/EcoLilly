@@ -51,19 +51,19 @@
                 <h3>Bamboo Products</h3>
             </a>
 
-            <a asp-controller="Shop" asp-action="Index" asp-route-category="Bags" class="category-card">
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Reusable Bags" class="category-card">
                 <span>🛍</span>
                 <h3>Reusable Bags</h3>
             </a>
 
-            <a asp-controller="Shop" asp-action="Index" asp-route-category="Care" class="category-card">
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Organic Care" class="category-card">
                 <span>🧴</span>
                 <h3>Organic Care</h3>
             </a>
 
-            <a asp-controller="Shop" asp-action="Index" asp-route-category="Home" class="category-card">
+            <a asp-controller="Shop" asp-action="Index" asp-route-category="Home Care" class="category-card">
                 <span>🏠</span>
-                <h3>Eco Home</h3>
+                <h3>Home Care</h3>
             </a>
 
         </div>
@@ -91,9 +91,15 @@
 
             @foreach (var p in Model.Take(4))
             {
+                var imgSrc = string.IsNullOrEmpty(p?.Image)
+                    ? Url.Content("~/images/no-image.png")
+                    : (p.Image.StartsWith("/") || p.Image.StartsWith("http")
+                        ? p.Image
+                        : Url.Content("~/images/products/" + p.Image));
+
                 <div class="product-card">
 
-                    <img src="@p.Image" alt="@p.Name" />
+                    <img src="@imgSrc" alt="@p.Name" />
 
                     <h3>@p.Name</h3>
 

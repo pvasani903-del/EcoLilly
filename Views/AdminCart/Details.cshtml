@@ -53,9 +53,17 @@
                             <td>
                                 @if (item.Product != null)
                                 {
+                                    // Resolve image path robustly: absolute/root URLs preserved, else use ~/images/products/{filename}
+                                    var imgSrc = string.IsNullOrEmpty(item.Product.Image)
+                                        ? Url.Content("~/images/no-image.png")
+                                        : (item.Product.Image.StartsWith("/") || item.Product.Image.StartsWith("http", System.StringComparison.OrdinalIgnoreCase)
+                                            ? item.Product.Image
+                                            : Url.Content("~/images/products/" + item.Product.Image));
+
                                     <div class="d-flex align-items-center gap-3">
-                                        <img src="@(string.IsNullOrEmpty(item.Product.Image) ? "/images/placeholder.jpg" : item.Product.Image)" 
-                                             class="rounded shadow-sm border" style="height:50px; width:50px; object-fit:cover;" />
+                                        <img src="@imgSrc" 
+                                             class="rounded shadow-sm border" style="height:50px; width:50px; object-fit:cover;"
+                                             onerror="this.onerror=null;this.src='@Url.Content("~/images/no-image.png")'" />
                                         <span class="fw-bold">@item.Product.Name</span>
                                     </div>
                                 }

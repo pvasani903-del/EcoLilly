@@ -24,7 +24,11 @@ namespace EcoLilly.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                carts = carts.Where(c => c.Product != null && c.Product.Name.Contains(search));
+                // allow searching by product name OR by user email
+                carts = carts.Where(c =>
+                    (c.Product != null && c.Product.Name.Contains(search)) ||
+                    (c.UserEmail != null && c.UserEmail.Contains(search))
+                );
             }
 
             var grouped = carts

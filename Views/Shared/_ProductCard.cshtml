@@ -1,9 +1,18 @@
 ﻿@model EcoLilly.Models.Product
 
+@{
+    // Robust image source resolution: supports absolute URLs, root-relative paths, or filenames stored in DB.
+    var imgSrc = string.IsNullOrEmpty(Model?.Image)
+        ? Url.Content("~/images/no-image.png")
+        : (Model.Image.StartsWith("/") || Model.Image.StartsWith("http")
+            ? Model.Image
+            : Url.Content("~/images/products/" + Model.Image));
+}
+
 <div class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
 
     <div class="relative overflow-hidden">
-        <img src="@Model.Image"
+        <img src="@imgSrc"
              class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
 
         <div class="absolute top-4 left-4 right-4 flex justify-between">

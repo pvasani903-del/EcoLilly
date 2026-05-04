@@ -4,13 +4,37 @@
     Layout = "_AdminLayout";
 }
 
+@functions {
+    private string BadgeClass(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status)) return "bg-secondary text-white";
+        var s = status.Trim().ToLowerInvariant();
+        return s switch
+        {
+            "paid" or "delivered" or "completed" or "success" => "bg-success text-white",
+            "failed" or "fail" or "cancelled" or "refunded" or "declined" => "bg-danger text-white",
+            "pending" => "bg-warning text-dark",
+            _ => "bg-warning text-dark"
+        };
+    }
+}
+
 <style>
     .metric-card { border-radius: 12px; border: 1px solid #eef2f5; background: #fff; padding: 20px; transition: 0.3s; }
     .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .status-badge { padding: .35rem .6rem; border-radius: .5rem; font-size: .85rem; font-weight: 600; }
+    .recent-orders-table tbody tr td { vertical-align: middle; }
+    /* Ensure recent orders card body scrolls instead of growing the layout */
+    .recent-card .card-body { max-height: 420px; overflow: auto; padding: 0.75rem 1rem; }
+    .recent-card .table { margin-bottom: 0; }
+    /* Small responsive tweak so columns stack gracefully on narrow screens */
+    @@media (max-width: 991.98px) {
+        .recent-card .card-body { max-height: 300px; }
+    }
 </style>
 
 <div class="row g-4 mb-4">
-    <!-- Products -->
+    <!-- Metrics -->
     <div class="col-md-3">
         <div class="metric-card shadow-sm d-flex justify-content-between align-items-center">
             <div>
@@ -23,7 +47,6 @@
         </div>
     </div>
 
-    <!-- Orders -->
     <div class="col-md-3">
         <div class="metric-card shadow-sm d-flex justify-content-between align-items-center">
             <div>
@@ -36,12 +59,11 @@
         </div>
     </div>
 
-    <!-- Customers -->
     <div class="col-md-3">
         <div class="metric-card shadow-sm d-flex justify-content-between align-items-center">
             <div>
                 <div class="text-muted small fw-bold mb-1">ACTIVE CUSTOMERS</div>
-                <h3 class="fw-bold text-purple mb-0" style="color: #6f42c1;">@Model.TotalUsers</h3>
+                <h3 class="fw-bold mb-0" style="color: #6f42c1;">@Model.TotalUsers</h3>
             </div>
             <div class="icon-box bg-opacity-10" style="background-color: rgba(111,66,193,0.1); color: #6f42c1;">
                 <i class="bi bi-people"></i>
@@ -49,12 +71,11 @@
         </div>
     </div>
 
-    <!-- Revenue -->
     <div class="col-md-3">
         <div class="metric-card shadow-sm d-flex justify-content-between align-items-center">
             <div>
                 <div class="text-muted small fw-bold mb-1">TOTAL REVENUE</div>
-                <h3 class="fw-bold text-danger mb-0" style="color: #e5652e !important;">₹@Model.TotalRevenue.ToString("0.00")</h3>
+                <h3 class="fw-bold mb-0" style="color: #e5652e !important;">₹@Model.TotalRevenue.ToString("0.00")</h3>
             </div>
             <div class="icon-box bg-opacity-10" style="background-color: rgba(229,101,46,0.1); color: #e5652e;">
                 <i class="bi bi-graph-up-arrow"></i>
@@ -63,27 +84,73 @@
     </div>
 </div>
 
-<!-- CHARTS ROW -->
+<!-- CHARTS + RECENT ORDERS ROW -->
 <div class="row g-4">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex justify-content-between">
-                <h5 class="fw-bold"><i class="bi bi-graph-up text-primary me-2"></i> Weekly Sales Overview</h5>
+    <!-- Chart column -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i> Weekly Sales Overview</h5>
                 <select class="form-select form-select-sm w-auto"><option>Last 7 days</option></select>
             </div>
             <div class="card-body px-4 pb-4">
-                <canvas id="salesChart" height="100"></canvas>
+                <div style="width:100%; min-height:320px;">
+                    <canvas id="salesChart" height="260"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                <h5 class="fw-bold"><i class="bi bi-leaf text-success me-2"></i> Top Products</h5>
+
+    <!-- Recent Orders column -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 recent-card h-100 d-flex flex-column">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-muted"></i> Recent Orders</h5>
+                @* small count removed to avoid the "5??0" artifact *@
             </div>
-            <div class="card-body px-4 text-muted text-center pt-5">
-                No product sales data available yet.
+
+            <div class="card-body">
+                @if (Model.RecentOrders == null || !Model.RecentOrders.Any())
+                {
+                    <div class="p-4 text-center text-muted">No recent orders yet.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0 recent-orders-table">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.RecentOrders.Take(8))
+                                {
+                                    <tr>
+                                        <td class="align-middle">#@o.Id</td>
+                                        <td class="align-middle">@o.CustomerName</td>
+                                        <td class="align-middle">@o.OrderDate.ToString("dd MMM")</td>
+                                        <td class="align-middle text-end">
+                                            <div>
+                                                <span class="status-badge @(BadgeClass(o.PaymentStatus))">
+                                                    @o.PaymentStatus
+                                                </span>
+                                            </div>
+                                            <div class="mt-1 fw-semibold">₹@o.TotalAmount.ToString("0.00")</div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer bg-white border-top-0 text-center py-3">
+                <a asp-controller="AdminOrder" asp-action="Index" class="btn btn-sm btn-outline-secondary">View all orders</a>
             </div>
         </div>
     </div>
@@ -91,31 +158,36 @@
 
 @section Scripts {
     <script>
-        var ctx = document.getElementById('salesChart').getContext('2d');
-        var salesChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @Html.Raw(Json.Serialize(Model.OrdersByDayLabels)),
-                datasets: [{
-                    label: 'Revenue (₹)',
-                    data: @Html.Raw(Json.Serialize(Model.OrdersByDayTotals)),
-                    borderColor: '#21a345',
-                    backgroundColor: 'rgba(33, 163, 69, 0.1)',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#21a345',
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                    x: { grid: { display: false } }
+        (function () {
+            var ctx = document.getElementById('salesChart')?.getContext('2d');
+            if (!ctx) return;
+
+            var salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.OrdersByDayLabels ?? new List<string>())),
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: @Html.Raw(Json.Serialize(Model.OrdersByDayTotals ?? new List<decimal>())),
+                        borderColor: '#21a345',
+                        backgroundColor: 'rgba(33, 163, 69, 0.12)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#21a345',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                        x: { grid: { display: false } }
+                    }
                 }
-            }
-        });
+            });
+        })();
     </script>
 }

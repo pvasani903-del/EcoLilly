@@ -45,9 +45,9 @@
                             <div class="flex items-center gap-4">
                                 <span class="font-bold">₹@(item.Price * item.Quantity)</span>
                                 
-                                <!-- Add Review Button -->
+                                <!-- Add Review Button (now green) -->
                                 <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })" 
-                                   class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition">
+                                   class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition">
                                     Write a Review
                                 </a>
                             </div>

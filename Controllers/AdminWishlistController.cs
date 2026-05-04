@@ -15,16 +15,26 @@ namespace EcoLilly.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        // Index with optional search by product name or user email
+        public IActionResult Index(string search)
         {
             if (HttpContext.Session.GetString("Role") != "Admin")
                 return RedirectToAction("Login", "Account");
 
             var wishlists = _context.Wishlists
                 .Include(w => w.Product)
-                .ToList();
+                .AsQueryable();
 
-            return View(wishlists);
+            if (!string.IsNullOrEmpty(search))
+            {
+                wishlists = wishlists.Where(w =>
+                    (w.Product != null && w.Product.Name.Contains(search)) ||
+                    (w.UserEmail != null && w.UserEmail.Contains(search))
+                );
+            }
+
+            var list = wishlists.ToList();
+            return View(list);
         }
 
         [HttpPost]

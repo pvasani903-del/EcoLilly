@@ -27,6 +27,12 @@
 
             @foreach (var item in Model)
             {
+                var imgSrc = string.IsNullOrEmpty(item.Image)
+                    ? Url.Content("~/images/no-image.png")
+                    : (item.Image.StartsWith("/") || item.Image.StartsWith("http", System.StringComparison.OrdinalIgnoreCase)
+                        ? item.Image
+                        : Url.Content("~/images/products/" + item.Image));
+
                 var features = item.EcoFeatures?.Split(',');
 
                 <div class="wishlist-card">
@@ -34,7 +40,7 @@
                     <!-- IMAGE -->
                     <div class="image-section">
 
-                        <img src="@item.Image" alt="@item.Name" />
+                        <img src="@imgSrc" alt="@item.Name" onerror="this.onerror=null;this.src='@Url.Content("~/images/no-image.png")'" />
 
                         <a asp-controller="Wishlist"
                            asp-action="Remove"

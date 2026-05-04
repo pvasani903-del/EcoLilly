@@ -5,13 +5,13 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>Discounts</h4>
-    <a class="btn btn-primary" href="@Url.Action("Create","AdminDiscount")">Add Discount</a>
+    <a class="btn btn-success" href="@Url.Action("Create","AdminDiscount")">Add Discount</a>
 </div>
 
 <form method="get" class="mb-3">
     <div class="input-group">
         <input name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Search code..." />
-        <button class="btn btn-outline-secondary">Search</button>
+        <button class="btn btn-primary">Search</button>
     </div>
 </form>
 
@@ -49,12 +49,12 @@
                     </form>
                 </td>
                 <td class="text-end">
-                    <a class="btn btn-sm btn-warning me-1" asp-controller="AdminDiscount" asp-action="Edit" asp-route-id="@d.Id">Edit</a>
+                    <a class="btn btn-sm btn-info me-1" asp-controller="AdminDiscount" asp-action="Edit" asp-route-id="@d.Id">Edit</a>
 
                     <form asp-controller="AdminDiscount" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this discount?');">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@d.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                     </form>
                 </td>
             </tr>

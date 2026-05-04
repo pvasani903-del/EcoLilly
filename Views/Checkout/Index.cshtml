@@ -1,0 +1,367 @@
+﻿@model IEnumerable<EcoLilly.Models.CartItem>
+@{
+    ViewData["Title"] = "Checkout";
+    var cartItems = Model.ToList();
+    var total = cartItems.Sum(i => i.Product.Price * i.Quantity);
+    var offers = ViewBag.Offers as List<EcoLilly.Models.Offer> ?? new();
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Delivery details</h4>
+
+            <!-- the same form now will be used for normal POST on COD -->
+            <form id="checkoutForm" method="post" asp-action="PlaceOrder" asp-controller="Checkout">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Full name</label>
+                    <input required class="form-control" id="name" name="name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input required class="form-control" id="phone" name="phone" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea required class="form-control" id="address" name="address"></textarea>
+                </div>
+
+                <h5>Apply Offers</h5>
+                <div class="mb-2 d-flex gap-2 flex-wrap align-items-center" id="offersContainer">
+                    @foreach (var o in offers)
+                    {
+                        <button type="button" class="btn btn-outline-primary offer-btn" data-id="@o.Id" data-type="@o.DiscountType" data-value="@o.Value">@o.Title</button>
+                    }
+                    <button type="button" class="btn btn-outline-secondary" id="clearOfferBtn">Clear Offer</button>
+
+                    <!-- Apply button and applied badge -->
+                    <button type="button" id="applyOfferBtn" class="btn btn-success ms-3">Apply Discount</button>
+                    <span id="appliedBadge" class="badge bg-success ms-2 d-none"></span>
+                </div>
+
+                <h5 class="mt-4">Payment Method</h5>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="pmCod" value="COD" checked>
+                        <label class="form-check-label" for="pmCod">Cash on Delivery (COD)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="pmOnline" value="Online">
+                        <label class="form-check-label" for="pmOnline">Online Payment (Cashfree)</label>
+                    </div>
+                </div>
+
+                <div id="paymentActions" class="mb-4">
+                    <!-- COD will submit the form normally -->
+                    <button id="placeOrderBtn" type="button" class="btn btn-success me-2">Place Order (COD)</button>
+                    <!-- Online still uses JS AJAX flow -->
+                    <button id="proceedPayBtn" type="button" class="btn btn-primary d-none">Proceed to Pay</button>
+                </div>
+
+                <input type="hidden" id="selectedOfferId" name="offerId" />
+                <input type="hidden" id="totalAmount" name="totalAmount" value="@total.ToString("0.00")" />
+                <input type="hidden" id="discountAmount" name="discountAmount" value="0.00" />
+                <input type="hidden" id="finalAmount" name="finalAmount" value="@total.ToString("0.00")" />
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Order summary</h4>
+            <ul class="list-group mb-3">
+                @foreach (var item in cartItems)
+                {
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">@item.Product.Name</h6>
+                            <small class="text-muted">Qty: @item.Quantity</small>
+                        </div>
+                        <span class="text-muted">₹@(item.Product.Price * item.Quantity)</span>
+                    </li>
+                }
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Subtotal</span>
+                    <strong id="summaryTotal">₹@total.ToString("0.00")</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Discount</span>
+                    <strong id="summaryDiscount">- ₹0.00</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Final amount</span>
+                    <strong id="summaryFinal">₹@total.ToString("0.00")</strong>
+                </li>
+            </ul>
+            <div id="alerts"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const total = parseFloat('@total'.replace(',', '')) || 0;
+        let selectedOffer = null;
+        let appliedOffer = null; // holds server-validated applied offer data
+
+        const offerButtons = document.querySelectorAll('.offer-btn');
+        const clearOfferBtn = document.getElementById('clearOfferBtn');
+        const applyOfferBtn = document.getElementById('applyOfferBtn');
+        const appliedBadge = document.getElementById('appliedBadge');
+
+        const summaryTotal = document.getElementById('summaryTotal');
+        const summaryDiscount = document.getElementById('summaryDiscount');
+        const summaryFinal = document.getElementById('summaryFinal');
+
+        const selectedOfferIdInput = document.getElementById('selectedOfferId');
+        const totalAmountInput = document.getElementById('totalAmount');
+        const discountAmountInput = document.getElementById('discountAmount');
+        const finalAmountInput = document.getElementById('finalAmount');
+
+        function recomputeUI(localDiscount = null) {
+            // If server applied offer present, use that; otherwise use localDiscount if provided
+            const discount = appliedOffer ? parseFloat(appliedOffer.discount) : (localDiscount !== null ? localDiscount : (selectedOffer ? computeDiscount(total, selectedOffer) : 0));
+            const finalAmount = Math.max(0, total - discount);
+
+            summaryTotal.innerText = '₹' + total.toFixed(2);
+            summaryDiscount.innerText = '- ₹' + discount.toFixed(2);
+            summaryFinal.innerText = '₹' + finalAmount.toFixed(2);
+
+            selectedOfferIdInput.value = appliedOffer ? appliedOffer.offerId : (selectedOffer ? selectedOffer.id : '');
+            totalAmountInput.value = total.toFixed(2);
+            discountAmountInput.value = discount.toFixed(2);
+            finalAmountInput.value = finalAmount.toFixed(2);
+
+            // show applied badge
+            if (appliedOffer) {
+                appliedBadge.classList.remove('d-none');
+                appliedBadge.innerText = 'Applied: ' + appliedOffer.title;
+                // visually mark the applied offer button
+                offerButtons.forEach(b => {
+                    if (parseInt(b.dataset.id) === appliedOffer.offerId) {
+                        b.classList.remove('btn-outline-primary');
+                        b.classList.add('btn-primary');
+                    } else {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-primary');
+                    }
+                });
+            } else {
+                appliedBadge.classList.add('d-none');
+            }
+        }
+
+        function computeDiscount(totalVal, offer) {
+            if (!offer) return 0;
+            if (offer.type === 'Flat') return Math.min(offer.value, totalVal);
+            if (offer.type === 'Percentage') return Math.round(totalVal * (offer.value / 100) * 100) / 100;
+            return 0;
+        }
+
+        // offer selection only toggles UI selection; does not call server
+        offerButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = parseInt(this.dataset.id);
+                const type = this.dataset.type;
+                const value = parseFloat(this.dataset.value);
+
+                if (selectedOffer && selectedOffer.id === id) {
+                    selectedOffer = null;
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-primary');
+                } else {
+                    offerButtons.forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-primary');
+                    selectedOffer = { id, type, value };
+                }
+
+                // If an applied offer exists and user changes selection, clear appliedOffer (requires re-apply)
+                appliedOffer = null;
+                appliedBadge.classList.add('d-none');
+
+                // Update local UI preview immediately
+                recomputeUI();
+            });
+        });
+
+        // Apply the selected offer with a single server call
+        applyOfferBtn.addEventListener('click', function () {
+            if (!selectedOffer) {
+                showAlert('Please select an offer to apply', 'warning');
+                return;
+            }
+
+            // Prepare form data for server calculation
+            const fd = new FormData();
+            fd.append('offerId', selectedOffer.id);
+            fd.append('total', total.toFixed(2));
+
+            // Anti-forgery token from the form
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            applyOfferBtn.disabled = true;
+            applyOfferBtn.innerText = 'Applying...';
+
+            fetch('@Url.Action("ApplyOffer", "Checkout")', {
+                method: 'POST',
+                body: fd,
+                headers: { 'RequestVerificationToken': token }
+            }).then(r => r.json()).then(j => {
+                applyOfferBtn.disabled = false;
+                applyOfferBtn.innerText = 'Apply Discount';
+
+                if (!j.success) {
+                    showAlert(j.message || 'Unable to apply offer', 'danger');
+                    return;
+                }
+
+                // Save appliedOffer info for later (server-calculated discount & final)
+                appliedOffer = {
+                    offerId: selectedOffer.id,
+                    title: document.querySelector('.offer-btn.btn-primary')?.innerText || 'Offer',
+                    discount: parseFloat(j.discount),
+                    finalAmount: parseFloat(j.finalAmount)
+                };
+
+                // Update UI with server result
+                recomputeUI();
+                showAlert('Offer applied', 'success');
+            }).catch(() => {
+                applyOfferBtn.disabled = false;
+                applyOfferBtn.innerText = 'Apply Discount';
+                showAlert('Server error applying offer', 'danger');
+            });
+        });
+
+        // Clear both selected and applied offer
+        clearOfferBtn.addEventListener('click', function () {
+            selectedOffer = null;
+            appliedOffer = null;
+            offerButtons.forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
+            appliedBadge.classList.add('d-none');
+            recomputeUI();
+        });
+
+        recomputeUI();
+
+        // Payment selection toggles
+        const pmCod = document.getElementById('pmCod');
+        const pmOnline = document.getElementById('pmOnline');
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        const proceedPayBtn = document.getElementById('proceedPayBtn');
+        const checkoutForm = document.getElementById('checkoutForm');
+
+        function togglePaymentButtons() {
+            if (pmOnline.checked) {
+                placeOrderBtn.classList.add('d-none');
+                proceedPayBtn.classList.remove('d-none');
+            } else {
+                placeOrderBtn.classList.remove('d-none');
+                proceedPayBtn.classList.add('d-none');
+            }
+        }
+
+        pmCod.addEventListener('change', togglePaymentButtons);
+        pmOnline.addEventListener('change', togglePaymentButtons);
+        togglePaymentButtons();
+
+        // COD: normal form POST (server will redirect to Success)
+        placeOrderBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (!validateAddress()) return;
+
+            // Hidden fields already set by recomputeUI
+            checkoutForm.submit();
+        });
+
+        // Online: existing AJAX/cftoken flow (unchanged)
+        let submitting = false;
+        proceedPayBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (submitting) return;
+            if (!validateAddress()) return;
+
+            submitting = true;
+            proceedPayBtn.disabled = true;
+            proceedPayBtn.innerText = 'Preparing payment...';
+
+            const fd = new FormData();
+            fd.append('name', document.getElementById('name').value);
+            fd.append('phone', document.getElementById('phone').value);
+            fd.append('address', document.getElementById('address').value);
+            fd.append('paymentMethod', 'Online');
+            fd.append('offerId', appliedOffer ? appliedOffer.offerId : (selectedOffer ? selectedOffer.id : ''));
+            fd.append('totalAmount', total.toFixed(2));
+            fd.append('discountAmount', document.getElementById('discountAmount').value);
+            fd.append('finalAmount', document.getElementById('finalAmount').value);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('@Url.Action("PlaceOrder", "Checkout")', {
+                method: 'POST',
+                body: fd,
+                headers: { 'RequestVerificationToken': token }
+            }).then(r => r.json()).then(j => {
+                if (!j.success) {
+                    showAlert(j.message || 'Unable to start payment', 'danger');
+                    submitting = false;
+                    proceedPayBtn.disabled = false;
+                    proceedPayBtn.innerText = 'Proceed to Pay';
+                    return;
+                }
+
+                if (j.online) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = j.checkoutUrl;
+                    form.style.display = 'none';
+
+                    const add = (name, value) => {
+                        const i = document.createElement('input');
+                        i.type = 'hidden';
+                        i.name = name;
+                        i.value = value;
+                        form.appendChild(i);
+                    };
+
+                    add('tokenData', j.token);
+                    add('orderId', j.orderId.toString());
+                    add('orderAmount', j.orderAmount.toString());
+                    add('returnUrl', '@Url.Action("PaymentCallback", "Checkout", null, Context.Request.Scheme)');
+
+                    document.body.appendChild(form);
+                    form.submit();
+                    setTimeout(() => {
+                        showAlert('If you are not redirected automatically, click Proceed to Pay again.', 'warning');
+                    }, 2500);
+                } else {
+                    if (j.redirect) window.location.href = j.redirect;
+                }
+            }).catch(() => {
+                showAlert('Server error initiating payment', 'danger');
+                submitting = false;
+                proceedPayBtn.disabled = false;
+                proceedPayBtn.innerText = 'Proceed to Pay';
+            });
+        });
+
+        function validateAddress() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            if (!name || !phone || !address) {
+                showAlert('Please fill name, phone and address', 'warning');
+                return false;
+            }
+            return true;
+        }
+
+        function showAlert(msg, type) {
+            const alerts = document.getElementById('alerts');
+            alerts.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+            setTimeout(() => alerts.innerHTML = '', 6000);
+        }
+    })();
+</script>

@@ -11,7 +11,7 @@
         My Orders
     </h2>
 
-    @if (!Model.Any())
+    @if (Model == null || !Model.Any())
     {
         <div class="bg-white p-8 rounded-xl shadow text-center">
             <h3 class="text-xl font-semibold mb-2">No Orders Yet</h3>
@@ -48,15 +48,16 @@
 
                 <!-- Order Items -->
                 <div class="space-y-4">
-                    @foreach (var item in order.OrderItems)
+                    @foreach (var item in order.OrderItems ?? new List<EcoLilly.Models.OrderItem>())
                     {
                         <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-gray-50 p-4 rounded-lg">
 
                             <!-- Product Info -->
                             <div>
                                 <p class="font-semibold text-gray-800">
-                                    @item.Product.Name
+                                    @(item.Product?.Name ?? "Product not available")
                                 </p>
+
                                 <p class="text-sm text-gray-500">
                                     Qty: @item.Quantity
                                 </p>
@@ -71,8 +72,10 @@
                                 </span>
 
                                 @{
-                                    var userReview = item.Product.Reviews?
-                                        .FirstOrDefault(r => r.User == order.UserEmail);
+                                   var userReview = item.Product?.Reviews?
+        .FirstOrDefault(r =>
+            r.User != null &&
+            r.User.ToLower() == order.UserEmail.ToLower());
                                 }
 
                                 @if (userReview != null)
@@ -84,14 +87,22 @@
                                         <span>@userReview.Comment</span>
                                     </div>
                                 }
-                                else
+                                else if (item.Product != null)
                                 {
-                                    <!-- Review Button -->
+                                    <!-- Review Button (green now) -->
                                     <a href="@Url.Action("Create", "Review", new { productId = item.ProductId })"
-                                       class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                                       class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition">
                                         Write Review
                                     </a>
                                 }
+                                else
+                                {
+                                    <!-- Product missing -->
+                                    <span class="text-red-500 text-sm">
+                                        Product not available
+                                    </span>
+                                }
+
                             </div>
 
                         </div>

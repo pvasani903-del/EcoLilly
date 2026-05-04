@@ -1,12 +1,21 @@
 ﻿using EcoLilly.Data;
 using Microsoft.EntityFrameworkCore;
+using EcoLilly.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+// Load environment variables from .env file
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MVC
+// MVC
 builder.Services.AddControllersWithViews();
 
-// Add Session
+// Session (existing)
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -15,46 +24,22 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Add Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register CashfreeService with typed HttpClient
+builder.Services.AddHttpClient<CashfreeService>();
+// Note: CashfreeService should have a constructor accepting IConfiguration and HttpClient.
 
 var app = builder.Build();
 
-// apply migrations and seed DB at startup
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    try
-//    {
-//        var db = services.GetRequiredService<ApplicationDbContext>();
-//        // apply pending migrations
-//        db.Database.Migrate();
-//        // seed data (creates admin + sample products if missing)
-//        DbInitializer.Seed(db);
-//    }
-//    catch (Exception ex)
-//    {
-//        // log or handle startup errors (consider ILogger here)
-//        Console.WriteLine("Database migration/seed failed: " + ex.Message);
-//        throw;
-//    }
-//}
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+// QuestPDF License
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-app.UseSession(); // IMPORTANT
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(

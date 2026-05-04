@@ -1,0 +1,309 @@
+/* Responsive fixes: only layout/spacing/wrapping/overflow changes.
+   Do NOT change colors, branding or structural HTML.
+   Breakpoints:
+     - Mobile: 0 - 640px
+     - Tablet: 641px - 1024px
+     - Desktop: 1025px+
+*/
+
+/* Basic box sizing and image behavior */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Images scale and won't break layouts */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent horizontal overflow in general */
+body {
+  overflow-x: hidden;
+}
+
+/* Make tables responsive when wrapped with .table-responsive */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure inline-styled admin thumbnails stay tidy on small screens */
+@media (max-width: 640px) {
+  img[style*="height:50px"],
+  img[style*="width:50px"],
+  img[style*="height:48px"],
+  img[style*="width:64px"] {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover !important;
+  }
+}
+
+/* Product, category and wishlist grids */
+.product-grid,
+.category-grid,
+.wishlist-grid,
+.why-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Default desktop (keep existing desktop appearance) */
+@media (min-width: 1025px) {
+  .category-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .why-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wishlist-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .product-card,
+  .wishlist-card {
+    align-self: stretch;
+  }
+}
+
+/* Tablet layout */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wishlist-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Slightly reduce card paddings for better fit */
+  .product-card,
+  .wishlist-card {
+    padding: 1rem;
+  }
+
+  /* Make admin tables and cards readable */
+  .card-body, .product-header, .product-grid .product-card {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Mobile layout - stack and make inputs/buttons full width */
+@media (max-width: 640px) {
+  /* Single column grids on small screens */
+  .category-grid,
+  .product-grid,
+  .why-grid,
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Make product / wishlist cards full width and flexible */
+  .product-card,
+  .wishlist-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  /* Ensure images inside cards have consistent aspect */
+  .product-card img,
+  .wishlist-card img,
+  .product-grid img,
+  .wishlist-grid img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 0.25rem;
+  }
+
+  /* Stack account layout (sidebar + content) */
+  .max-w-7xl.mx-auto.mt-10.grid,
+  .max-w-7xl.mx-auto.mt-10.grid.grid-cols-1,
+  .max-w-7xl.mx-auto.mt-10.grid.grid-cols-1.md\:grid-cols-4 {
+    display: block;
+  }
+
+  /* Sidebar full width */
+  .max-w-7xl.mx-auto.mt-10 .space-y-4 {
+    width: 100%;
+  }
+
+  /* Make sidebar menu items comfortably tappable */
+  .bg-white.rounded-lg.shadow a.block {
+    display: block;
+    width: 100%;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* Forms: inputs and buttons full width for mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select,
+  .form-control {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Reduce horizontal padding in small containers */
+  .container,
+  .hero-container,
+  .product-grid,
+  .category-grid,
+  .wishlist-grid,
+  .card-body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Make action buttons easier to tap */
+  .btn-cart,
+  .cart-btn,
+  .view-btn,
+  .continue-btn,
+  .checkout-btn,
+  .remove-btn,
+  .cart-btn,
+  .cart .btn {
+    width: 100%;
+    display: inline-block;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  /* Fix overflow for tables and long text */
+  table {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduce large fixed-height elements (hero image area) */
+  .hero-image img {
+    max-height: 240px;
+    object-fit: cover;
+  }
+
+  /* Account profile card spacing */
+  .bg-green-700.text-white.rounded-xl.p-6.text-center,
+  .bg-purple-700.text-white.rounded-xl.p-6.text-center {
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  /* Make user dropdown full width when open on mobile */
+  #userDropdown {
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    width: calc(100% - 2rem);
+  }
+}
+
+/* General helpers for spacing consistency across breakpoints */
+@media (min-width: 641px) {
+  .container,
+  .hero-container,
+  .product-grid,
+  .category-grid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .container,
+  .hero-container,
+  .product-grid,
+  .category-grid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Make nav search and header controls stack nicely on small screens */
+@media (max-width: 768px) {
+  header .max-w-7xl.mx-auto.px-6 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  header .flex.items-center.space-x-5 {
+    gap: 0.5rem;
+  }
+
+  header nav.hidden.md\:flex {
+    display: none !important;
+  }
+}
+
+/* Ensure onerror fallback images are not too large in sidebar */
+.bg-green-700 img,
+.bg-purple-700 img {
+  max-width: 120px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Small adjustments to prevent textarea or long text overflow */
+textarea {
+  white-space: normal;
+  word-break: break-word;
+  min-height: 80px;
+}
+
+/* Keep text readable on small devices: adjust font-size if necessary */
+@media (max-width: 420px) {
+  .product-card h3,
+  .product-card .price,
+  .wishlist-card h3 {
+    font-size: 1rem;
+  }
+
+  .product-card .price {
+    font-size: 0.95rem;
+  }
+}
+
+/* Last-resort horizontal-scroll prevention for elements with inline widths */
+*[style*="width:"] {
+  max-width: 100%;
+}
+
+/* Smooth scrolling for overflow containers */
+.table-responsive, .product-grid, .category-grid {
+  -webkit-overflow-scrolling: touch;
+}

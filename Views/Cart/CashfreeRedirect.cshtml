@@ -1,0 +1,137 @@
+﻿@model dynamic
+@{
+    Layout = null;
+    var token = Model?.Token ?? "";
+    var checkoutUrl = Model?.CheckoutUrl ?? "https://test.cashfree.com/billpay/checkout/post/submit";
+    var orderId = Model?.OrderId ?? "";
+    var orderAmount = Model?.OrderAmount ?? "";
+    var returnUrl = Model?.ReturnUrl ?? Url.Action("CashfreeCallback", "Cart", null, Context.Request.Scheme);
+    var appId = Model?.AppId ?? "";
+    var customerName = Model?.CustomerName ?? "";
+    var customerPhone = Model?.CustomerPhone ?? "";
+    var customerEmail = Model?.CustomerEmail ?? "";
+}
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Payment — Choose Method</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f6fb7; margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+        .card { width:100%; max-width:720px; background:#fff; padding:22px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.08); }
+        .row { display:flex; gap:12px; align-items:center; }
+        .option { flex:1; border:1px solid #e6e6e6; padding:14px; border-radius:8px; cursor:pointer; text-align:center; }
+        .option.selected { border-color:#10b981; box-shadow:0 6px 18px rgba(16,185,129,.12); }
+        .muted { color:#6b7280; font-size:.95rem; }
+        .actions { margin-top:18px; display:flex; gap:12px; }
+        .btn { padding:10px 16px; border-radius:8px; text-decoration:none; color:#fff; background:#10b981; border:none; cursor:pointer; }
+        .btn.ghost { background:#f3f4f6; color:#111827; }
+        .hidden { display:none; }
+        .note { font-size:.9rem; color:#374151; margin-top:8px; }
+        .error { color:#b91c1c; margin-top:12px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="margin:0 0 10px 0">Choose Payment Method</h2>
+        <p class="muted">Only two options are accepted here: Cash on Delivery (COD) or Online payment via Cashfree.</p>
+
+        <div class="row" style="margin-top:16px;">
+            <div id="optCod" class="option selected" data-value="COD" onclick="select('COD')">
+                <strong>Cash on Delivery</strong>
+                <div class="note">Pay when you receive the order</div>
+            </div>
+
+            <div id="optOnline" class="option" data-value="Online" onclick="select('Online')">
+                <strong>Online Payment (Cashfree)</strong>
+                <div class="note">Secure card/UPI/Netbanking via Cashfree</div>
+            </div>
+        </div>
+
+        <div id="codSection" style="margin-top:18px;">
+            <form asp-controller="Cart" asp-action="ConfirmCod" method="post" id="codForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderId" value="@orderId" />
+                <div class="muted">Confirm COD — we will keep your order and you will pay at delivery.</div>
+
+                <div class="actions">
+                    <button type="submit" class="btn">Confirm COD</button>
+                    <button type="button" class="btn ghost" onclick="select('Online')">Pay Online Instead</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="onlineSection" class="hidden" style="margin-top:18px;">
+            <div class="muted">You will be redirected to Cashfree's secure payment UI. Do not refresh the page while payment is in progress.</div>
+
+            <form id="cfForm" action="@checkoutUrl" method="post" accept-charset="utf-8" style="margin-top:12px;">
+                <input type="hidden" name="tokenData" value="@token" />
+                <input type="hidden" name="orderId" value="@orderId" />
+                <input type="hidden" name="orderAmount" value="@orderAmount" />
+                <input type="hidden" name="orderCurrency" value="INR" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <input type="hidden" name="appId" value="@appId" />
+
+                <!-- Add required customer fields -->
+                <input type="hidden" name="customerName" value="@customerName" />
+                <input type="hidden" name="customerPhone" value="@customerPhone" />
+                <input type="hidden" name="customerEmail" value="@customerEmail" />
+
+                <div class="actions">
+                    <button type="button" class="btn" onclick="submitCashfree()">Pay ₹@orderAmount</button>
+                    <button type="button" class="btn ghost" onclick="select('COD')">Choose COD Instead</button>
+                </div>
+            </form>
+
+            <noscript class="muted" style="display:block; margin-top:12px;">
+                JavaScript is required to auto-redirect to Cashfree. Press the "Pay" button to continue.
+            </noscript>
+        </div>
+
+        <div id="errorBox" class="muted error" style="margin-top:14px;"></div>
+    </div>
+
+    <script>
+        function select(v) {
+            var cod = document.getElementById('codSection');
+            var onl = document.getElementById('onlineSection');
+            var optCod = document.getElementById('optCod');
+            var optOnline = document.getElementById('optOnline');
+            if (v === 'COD') {
+                cod.classList.remove('hidden');
+                onl.classList.add('hidden');
+                optCod.classList.add('selected');
+                optOnline.classList.remove('selected');
+            } else {
+                cod.classList.add('hidden');
+                onl.classList.remove('hidden');
+                optCod.classList.remove('selected');
+                optOnline.classList.add('selected');
+            }
+        }
+
+        function submitCashfree() {
+            var form = document.getElementById('cfForm');
+            if (!form) { showError('Payment form not available.'); return; }
+            var token = form.querySelector('input[name="tokenData"]').value;
+            if (!token) { showError('Payment token is missing. Please try again.'); return; }
+            var appId = form.querySelector('input[name="appId"]').value;
+            if (!appId) { showError('AppId is missing. Contact site admin.'); return; }
+            form.submit();
+            setTimeout(function () {
+                var err = document.getElementById('errorBox');
+                if (err) err.innerText = 'If you are not redirected automatically, use the button that appears.';
+            }, 2000);
+        }
+
+        function showError(msg) {
+            var e = document.getElementById('errorBox');
+            e.innerText = msg;
+        }
+
+        (function(){ select('COD'); })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+@model dynamic
+@{
+    // serialize values safely for JS
+    var json = System.Text.Json.JsonSerializer.Serialize(new { orderId = (int)Model.orderId, success = (bool)Model.success, message = (string)Model.message });
+}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Payment result</title>
+    <style> body { font-family: system-ui, Arial; padding:20px; text-align:center; } .msg{margin-top:20px;} </style>
+</head>
+<body>
+    <h2>Processing payment result…</h2>
+    <div class="msg">@Model.message</div>
+
+    <script>
+        (function () {
+            const data = @Html.Raw(json);
+            const orderId = data.orderId;
+            const success = data.success;
+
+            try {
+                if (window.opener && !window.opener.closed) {
+                    if (success) {
+                        // navigate parent to Success (shows order) and refresh
+                        window.opener.location.href = '@Url.Action("Success","Cart", new { orderId = "__ORDERID__" })'.replace("__ORDERID__", orderId);
+                    } else {
+                        window.opener.location.href = '@Url.Action("Checkout","Cart")';
+                    }
+                    window.close();
+                    return;
+                }
+            } catch (e) {
+                // ignore cross-origin errors
+            }
+
+            // No opener — redirect current window
+            if (success) {
+                window.location.href = '@Url.Action("Success","Cart", new { orderId = "__ORDERID__" })'.replace("__ORDERID__", orderId);
+            } else {
+                window.location.href = '@Url.Action("Checkout","Cart")';
+            }
+        })();
+    </script>
+</body>
+</html>

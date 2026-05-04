@@ -11,7 +11,6 @@ namespace EcoLilly.Data
         }
 
         public DbSet<Product> Products { get; set; }
-
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Contact> Contacts { get; set; }
@@ -19,12 +18,13 @@ namespace EcoLilly.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
-
         public DbSet<Admin> Admins { get; set; }
 
-        // Discount / Coupon Table
+        // Legacy Discount table (if present)
         public DbSet<Discount> Discounts { get; set; }
-        public object Cart { get; internal set; }
+
+        // Offers for checkout
+        public DbSet<Offer> Offers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +34,14 @@ namespace EcoLilly.Data
 
             modelBuilder.Entity<Order>()
                 .Property(o => o.TotalAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.DiscountAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.FinalAmount)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<OrderItem>()
